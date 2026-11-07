@@ -72,10 +72,10 @@ function RunView() {
               }`}
             >
               {a.id === "matching" && !running && result !== "combined" && (
-                <span className="pointer-events-none absolute right-3 top-12 -rotate-6 rounded-sm border-2 border-warning/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-warning/80">Should have been caught</span>
+                <span className="pointer-events-none absolute bottom-4 right-3 -rotate-6 rounded-sm border-2 border-warning/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-warning/80">Should have been caught</span>
               )}
               {a.id === "policy" && !running && result === "combined" && (
-                <span className="pointer-events-none absolute right-3 top-12 -rotate-6 rounded-sm border-2 border-primary/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary/80">Duplicate caught</span>
+                <span className="pointer-events-none absolute bottom-4 right-3 -rotate-6 rounded-sm border-2 border-primary/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary/80">Duplicate caught</span>
               )}
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">Step {i + 1}</span>
