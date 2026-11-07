@@ -1,23 +1,65 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { AlertTriangle } from "lucide-react";
+import { AppShell } from "@/components/AppShell";
+import { alert, runs } from "@/lib/mock-data";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Runs — Ledger Watch" },
+      { name: "description", content: "Monitor AI agent runs processing vendor invoices." },
+      { property: "og:title", content: "Runs — Ledger Watch" },
+      { property: "og:description", content: "Monitor AI agent runs processing vendor invoices." },
+    ],
+  }),
+  component: RunsPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function RunsPage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <AppShell>
+      <div className="mb-10 flex items-center justify-between gap-6 rounded-lg border border-destructive/50 bg-destructive/10 px-6 py-5">
+        <div className="flex items-start gap-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+          <div>
+            <p className="font-medium">
+              Invoice {alert.invoice} was paid twice, {alert.amount}.
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Vendor: {alert.vendor}</p>
+          </div>
+        </div>
+        <Link
+          to="/runs/$runId"
+          params={{ runId: alert.runId }}
+          className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Investigate
+        </Link>
+      </div>
+
+      <h1 className="mb-6 text-2xl font-semibold">Runs</h1>
+      <div className="overflow-hidden rounded-lg border border-border">
+        <table className="w-full text-sm">
+          <thead className="bg-card text-left text-muted-foreground">
+            <tr>
+              {["Run", "Vendor", "Amount", "Status", "Date"].map((h) => (
+                <th key={h} className="px-6 py-4 font-medium">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {runs.map((r) => (
+              <tr key={r.id} className="border-t border-border">
+                <td className="px-6 py-4 font-mono">{r.id}</td>
+                <td className="px-6 py-4">{r.vendor}</td>
+                <td className="px-6 py-4">{r.amount}</td>
+                <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
+                <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </AppShell>
   );
 }
