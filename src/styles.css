@@ -10,11 +10,12 @@
 @import "tw-animate-css";
 
 /*
- * Design system definition: modern ledger.
+ * Design system definition: industrial dark.
  *
- * Warm paper background, ink text, thin ruled lines. Stamp red marks problems,
- * deep green marks success. Serif headings, sans body, mono with tabular
- * numerals for invoice numbers and amounts. All colors use oklch.
+ * Near-black background, dark steel panels, thin flat lines. Hazard yellow marks
+ * warnings, red marks failure, green marks passing. Condensed grotesk headings,
+ * grotesk body, mono with tabular numerals for ids and amounts. No gradients,
+ * no shadows. All colors use oklch.
  */
 
 @theme inline {
@@ -25,8 +26,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4", Georgia, serif;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Oswald", "Archivo", ui-sans-serif, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -65,41 +66,42 @@
 }
 
 :root {
-  --radius: 0.375rem;
-  /* Warm paper #F6F1E7, ink #1B2433, stamp red #B3261E, deep green #1F5F4A */
-  --background: oklch(0.951 0.018 95);
-  --foreground: oklch(0.27 0.04 256);
-  --card: oklch(0.972 0.012 95);
-  --card-foreground: oklch(0.27 0.04 256);
-  --popover: oklch(0.972 0.012 95);
-  --popover-foreground: oklch(0.27 0.04 256);
-  --primary: oklch(0.45 0.075 168);
-  --primary-foreground: oklch(0.96 0.015 95);
-  --secondary: oklch(0.925 0.02 95);
-  --secondary-foreground: oklch(0.27 0.04 256);
-  --muted: oklch(0.925 0.02 95);
-  --muted-foreground: oklch(0.48 0.03 256);
-  --accent: oklch(0.925 0.02 95);
-  --accent-foreground: oklch(0.27 0.04 256);
-  --destructive: oklch(0.505 0.185 27);
-  --destructive-foreground: oklch(0.96 0.015 95);
-  --warning: oklch(0.505 0.185 27);
-  --border: oklch(0.855 0.02 95);
-  --input: oklch(0.855 0.02 95);
-  --ring: oklch(0.45 0.075 168);
-  --chart-1: oklch(0.45 0.075 168);
-  --chart-2: oklch(0.55 0.06 168);
-  --chart-3: oklch(0.65 0.05 168);
-  --chart-4: oklch(0.505 0.185 27);
-  --chart-5: oklch(0.6 0.12 40);
-  --sidebar: oklch(0.932 0.02 95);
-  --sidebar-foreground: oklch(0.27 0.04 256);
-  --sidebar-primary: oklch(0.45 0.075 168);
-  --sidebar-primary-foreground: oklch(0.96 0.015 95);
-  --sidebar-accent: oklch(0.905 0.02 95);
-  --sidebar-accent-foreground: oklch(0.27 0.04 256);
-  --sidebar-border: oklch(0.855 0.02 95);
-  --sidebar-ring: oklch(0.45 0.075 168);
+  --radius: 0.25rem;
+  /* Background #0E0F11, panels #1A1C20, text #ECEAE4, dim #8B8E94,
+     hazard yellow #FFC400, red #FF4B3E, green #3DDC97 */
+  --background: oklch(0.165 0.005 260);
+  --foreground: oklch(0.93 0.008 90);
+  --card: oklch(0.215 0.008 260);
+  --card-foreground: oklch(0.93 0.008 90);
+  --popover: oklch(0.215 0.008 260);
+  --popover-foreground: oklch(0.93 0.008 90);
+  --primary: oklch(0.79 0.17 160);
+  --primary-foreground: oklch(0.165 0.005 260);
+  --secondary: oklch(0.26 0.008 260);
+  --secondary-foreground: oklch(0.93 0.008 90);
+  --muted: oklch(0.26 0.008 260);
+  --muted-foreground: oklch(0.63 0.012 260);
+  --accent: oklch(0.26 0.008 260);
+  --accent-foreground: oklch(0.93 0.008 90);
+  --destructive: oklch(0.63 0.22 27);
+  --destructive-foreground: oklch(0.165 0.005 260);
+  --warning: oklch(0.83 0.16 90);
+  --border: oklch(0.32 0.01 260);
+  --input: oklch(0.32 0.01 260);
+  --ring: oklch(0.79 0.17 160);
+  --chart-1: oklch(0.79 0.17 160);
+  --chart-2: oklch(0.83 0.16 90);
+  --chart-3: oklch(0.63 0.22 27);
+  --chart-4: oklch(0.63 0.012 260);
+  --chart-5: oklch(0.93 0.008 90);
+  --sidebar: oklch(0.19 0.007 260);
+  --sidebar-foreground: oklch(0.93 0.008 90);
+  --sidebar-primary: oklch(0.79 0.17 160);
+  --sidebar-primary-foreground: oklch(0.165 0.005 260);
+  --sidebar-accent: oklch(0.26 0.008 260);
+  --sidebar-accent-foreground: oklch(0.93 0.008 90);
+  --sidebar-border: oklch(0.32 0.01 260);
+  --sidebar-ring: oklch(0.79 0.17 160);
 }
 
 @layer base {
@@ -117,6 +119,8 @@
   h2,
   h3 {
     font-family: var(--font-serif);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   /* Tabular numerals for invoice numbers and amounts */
