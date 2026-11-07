@@ -9,24 +9,12 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 /*
- * Design system definition.
+ * Design system definition: modern ledger.
  *
- * The design lives in this file: oklch color tokens on the shadcn variables
- * (--background, --foreground, --primary, --secondary, --muted, --accent, ...) plus
- * new tokens as needed, font tokens, and custom styles and animations.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Warm paper background, ink text, thin ruled lines. Stamp red marks problems,
+ * deep green marks success. Serif headings, sans body, mono with tabular
+ * numerals for invoice numbers and amounts. All colors use oklch.
  */
 
 @theme inline {
@@ -37,6 +25,9 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -74,40 +65,41 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.16 0.008 230);
-  --foreground: oklch(0.97 0.004 230);
-  --card: oklch(0.2 0.01 230);
-  --card-foreground: oklch(0.97 0.004 230);
-  --popover: oklch(0.2 0.01 230);
-  --popover-foreground: oklch(0.97 0.004 230);
-  --primary: oklch(0.75 0.13 185);
-  --primary-foreground: oklch(0.16 0.02 200);
-  --secondary: oklch(0.26 0.01 230);
-  --secondary-foreground: oklch(0.97 0.004 230);
-  --muted: oklch(0.26 0.01 230);
-  --muted-foreground: oklch(0.82 0.01 230);
-  --accent: oklch(0.26 0.01 230);
-  --accent-foreground: oklch(0.97 0.004 230);
-  --destructive: oklch(0.68 0.19 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.8 0.15 75);
-  --border: oklch(0.3 0.01 230);
-  --input: oklch(0.3 0.01 230);
-  --ring: oklch(0.75 0.13 185);
-  --chart-1: oklch(0.75 0.13 185);
-  --chart-2: oklch(0.6 0.1 185);
-  --chart-3: oklch(0.5 0.08 185);
-  --chart-4: oklch(0.8 0.15 75);
-  --chart-5: oklch(0.68 0.19 25);
-  --sidebar: oklch(0.13 0.008 230);
-  --sidebar-foreground: oklch(0.97 0.004 230);
-  --sidebar-primary: oklch(0.75 0.13 185);
-  --sidebar-primary-foreground: oklch(0.16 0.02 200);
-  --sidebar-accent: oklch(0.26 0.01 230);
-  --sidebar-accent-foreground: oklch(0.97 0.004 230);
-  --sidebar-border: oklch(0.3 0.01 230);
-  --sidebar-ring: oklch(0.75 0.13 185);
+  --radius: 0.375rem;
+  /* Warm paper #F6F1E7, ink #1B2433, stamp red #B3261E, deep green #1F5F4A */
+  --background: oklch(0.951 0.018 95);
+  --foreground: oklch(0.27 0.04 256);
+  --card: oklch(0.972 0.012 95);
+  --card-foreground: oklch(0.27 0.04 256);
+  --popover: oklch(0.972 0.012 95);
+  --popover-foreground: oklch(0.27 0.04 256);
+  --primary: oklch(0.45 0.075 168);
+  --primary-foreground: oklch(0.96 0.015 95);
+  --secondary: oklch(0.925 0.02 95);
+  --secondary-foreground: oklch(0.27 0.04 256);
+  --muted: oklch(0.925 0.02 95);
+  --muted-foreground: oklch(0.48 0.03 256);
+  --accent: oklch(0.925 0.02 95);
+  --accent-foreground: oklch(0.27 0.04 256);
+  --destructive: oklch(0.505 0.185 27);
+  --destructive-foreground: oklch(0.96 0.015 95);
+  --warning: oklch(0.505 0.185 27);
+  --border: oklch(0.855 0.02 95);
+  --input: oklch(0.855 0.02 95);
+  --ring: oklch(0.45 0.075 168);
+  --chart-1: oklch(0.45 0.075 168);
+  --chart-2: oklch(0.55 0.06 168);
+  --chart-3: oklch(0.65 0.05 168);
+  --chart-4: oklch(0.505 0.185 27);
+  --chart-5: oklch(0.6 0.12 40);
+  --sidebar: oklch(0.932 0.02 95);
+  --sidebar-foreground: oklch(0.27 0.04 256);
+  --sidebar-primary: oklch(0.45 0.075 168);
+  --sidebar-primary-foreground: oklch(0.96 0.015 95);
+  --sidebar-accent: oklch(0.905 0.02 95);
+  --sidebar-accent-foreground: oklch(0.27 0.04 256);
+  --sidebar-border: oklch(0.855 0.02 95);
+  --sidebar-ring: oklch(0.45 0.075 168);
 }
 
 @layer base {
@@ -118,5 +110,17 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+  }
+
+  /* Tabular numerals for invoice numbers and amounts */
+  .font-mono {
+    font-feature-settings: "tnum";
   }
 }
