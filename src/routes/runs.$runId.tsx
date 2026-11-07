@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, FileText, Pause, Pencil, Play, LoaderCircle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, FileText, Pause, Pencil, Play, LoaderCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { agents, alert } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ function RunView() {
       <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Runs
       </Link>
-      <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-2xl font-semibold">Run <span className="font-mono">{runId}</span></h1>
+      <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-serif text-3xl font-semibold">Run <span className="font-mono">{runId}</span></h1>
         <Button variant="outline" disabled={running} onClick={() => { setSelected(null); setResult(null); setReplay({ step: 0, rule: state.rule }); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
@@ -67,10 +67,16 @@ function RunView() {
             <Button variant="ghost"
               aria-label={`${a.name} agent`}
               onClick={() => setSelected(a)}
-              className={`h-auto min-h-[310px] w-full min-w-0 flex-col items-stretch justify-start whitespace-normal rounded-lg border bg-card p-4 text-left transition-colors hover:border-primary hover:bg-card ${
+              className={`relative h-auto min-h-[310px] w-full min-w-0 flex-col items-stretch justify-start whitespace-normal rounded-sm border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary hover:bg-card ${
                 running && replay?.step === i ? "border-primary ring-2 ring-primary/40" : typeof selected === "object" && selected?.id === a.id ? "border-primary" : a.status === "warning" ? "border-warning" : "border-border"
               }`}
             >
+              {a.id === "matching" && !running && result !== "combined" && (
+                <span className="pointer-events-none absolute right-3 top-12 -rotate-6 rounded-sm border-2 border-warning/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-warning/80">Should have been caught</span>
+              )}
+              {a.id === "policy" && !running && result === "combined" && (
+                <span className="pointer-events-none absolute right-3 top-12 -rotate-6 rounded-sm border-2 border-primary/70 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary/80">Duplicate caught</span>
+              )}
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">Step {i + 1}</span>
                 {running && replay?.step === i ? <LoaderCircle className="h-4 w-4 text-primary motion-safe:animate-spin" /> : a.status === "warning" ? (
@@ -85,9 +91,14 @@ function RunView() {
               </p>
               <div className="mt-5">
                 <p className="text-xs text-muted-foreground">Confidence</p>
-                <p className={`text-3xl font-semibold ${a.status === "warning" ? "text-warning" : ""}`}>{a.confidence}%</p>
-                <div className="mt-2 h-1 rounded bg-secondary">
-                  <div className={`h-1 rounded ${a.status === "warning" ? "bg-warning" : "bg-primary"}`} style={{ width: `${a.confidence}%` }} />
+                <p className={`font-mono text-3xl font-semibold ${a.status === "warning" ? "text-warning" : ""}`}>{a.confidence}%</p>
+                <div className="relative mt-3 h-5 border-b border-foreground/30" role="img" aria-label={`Confidence ${a.confidence} percent`}>
+                  <div className="absolute inset-x-0 bottom-0 flex justify-between">
+                    {Array.from({ length: 11 }, (_, tick) => (
+                      <span key={tick} className={`w-px bg-foreground/30 ${tick % 5 === 0 ? "h-3" : "h-1.5"}`} />
+                    ))}
+                  </div>
+                  <span className={`absolute bottom-0 h-5 w-0.5 ${a.status === "warning" ? "bg-warning" : "bg-primary"}`} style={{ left: `calc(${a.confidence}% - 1px)` }} />
                 </div>
               </div>
               <div className="mt-5 flex flex-col gap-1.5">
@@ -100,8 +111,8 @@ function RunView() {
             </Button>
             {a.handoff && (
                <div className="flex w-14 shrink-0 flex-col items-center justify-center px-1 text-center xl:w-20">
-                <ArrowRight className={`h-5 w-5 ${a.status === "warning" ? "text-warning" : "text-primary"}`} />
-                <span className="mt-2 text-xs text-muted-foreground">{a.handoff}</span>
+                <div className={`w-full border-t-2 border-dotted ${a.status === "warning" ? "border-warning/60" : "border-primary/50"}`} />
+                <span className="mt-2 text-xs italic text-muted-foreground">{a.handoff}</span>
               </div>
             )}
           </div>
