@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Prototype architecture
+- Keep cross-page prototype actions in a root-mounted React context with a pure reducer so navigation preserves state and undo/replay remain testable without persistence.
