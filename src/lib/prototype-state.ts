@@ -21,9 +21,9 @@ export type PrototypeAction =
   | { type: "undo"; id: number; time: string };
 export const initialPrototypeState: PrototypeState = { paused: false, rule: "exact", log: [], nextId: 1 };
 export const queuedInvoices = [
-  { id: "INV-4821-B", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710" },
-  { id: "INV-4821-C", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710" },
-  { id: "INV-4821-D", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710" },
+  { id: "INV-4821-B", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710", legit: false },
+  { id: "INV-4821-C", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710", legit: false },
+  { id: "INV-4821-D", vendor: "Harbor Office Supply", amount: "$3,150", po: "PO-7742", legit: true },
 ];
 export function replayOutcome(rule: DuplicateRule) {
   return { caught: rule === "combined", payment: rule === "combined" ? "held" : "paid" } as const;
