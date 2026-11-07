@@ -142,7 +142,7 @@ function RunView() {
         <div className="relative min-w-0 pt-2 pb-6">
           <div className="absolute inset-x-0 top-[26px] h-0.5 bg-border" aria-hidden="true" />
           <div
-            className={`absolute top-[4px] z-10 -translate-x-1/2 ${reducedMotion ? "" : "transition-[left] duration-1000 ease-linear"}`}
+            className={`absolute top-[4px] z-10 -translate-x-1/2 ${reducedMotion ? "" : "transition-[left] duration-1000 ease-linear"} ${replay !== null && step >= 4 && !caught ? "opacity-0" : ""}`}
             style={{ left: slipLeft }}
             aria-hidden="true"
           >
@@ -159,9 +159,9 @@ function RunView() {
                   onClick={() => setSelected(a)}
                   className={`flex flex-col border bg-card text-left transition-colors hover:border-primary ${s === "held" ? "border-destructive" : s === "warn" || s === "flag" ? "border-warning" : "border-border"}`}
                 >
-                  <div className="flex items-center justify-between border-b border-border px-3 py-2">
-                    <span className="text-xs font-medium uppercase tracking-widest">{a.name}</span>
-                    {s === "running" ? <LoaderCircle className="h-3.5 w-3.5 text-primary motion-safe:animate-spin" /> : <span className={`h-2.5 w-2.5 rounded-full ${lightClass(i)}`} aria-label={`Status: ${s}`} />}
+                  <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+                    <span className="min-w-0 truncate text-xs font-medium uppercase tracking-widest">{a.name}</span>
+                    {s === "running" ? <LoaderCircle className="h-3.5 w-3.5 shrink-0 text-primary motion-safe:animate-spin" /> : <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${lightClass(i)}`} aria-label={`Status: ${s}`} />}
                   </div>
                   <div className="px-3 py-4">
                     {s === "held" && <div className="mb-3 h-1 w-full bg-destructive" aria-hidden="true" />}
