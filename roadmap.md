@@ -1,5 +1,5 @@
 # Prototype additions
-- [ ] Duplicate chips and agent investigation evidence
-- [ ] Shared local pause/rule state and undoable activity
-- [ ] Sequential replay using current duplicate rule
-- [ ] Secondary text contrast and end-to-end checks
+- [x] Duplicate chips and agent investigation evidence
+- [x] Shared local pause/rule state and undoable activity
+- [x] Sequential replay using current duplicate rule
+- [x] Secondary text contrast and end-to-end checks
