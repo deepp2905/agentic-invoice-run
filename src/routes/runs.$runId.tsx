@@ -160,7 +160,7 @@ function RunView() {
                   className={`flex flex-col border bg-card text-left transition-colors hover:border-primary ${s === "held" ? "border-destructive" : s === "warn" || s === "flag" ? "border-warning" : "border-border"}`}
                 >
                   <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
-                    <span className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wider">{a.name}</span>
+                    <span className="min-w-0 truncate text-[10px] font-medium uppercase tracking-wide">{a.name}</span>
                     {s === "running" ? <LoaderCircle className="h-3.5 w-3.5 shrink-0 text-primary motion-safe:animate-spin" /> : <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${lightClass(i)}`} aria-label={`Status: ${s}`} />}
                   </div>
                   <div className="px-3 py-4">
