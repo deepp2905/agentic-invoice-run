@@ -27,7 +27,7 @@ function Slip({ id, amount, note, tone = "default" }: { id: string; amount?: str
   return (
     <div className={`border bg-card px-3 py-2 ${toneClass}`}>
       <p className="font-mono text-xs font-medium whitespace-nowrap">{id}{amount ? ` · ${amount}` : ""}</p>
-      {note && <p className="mt-1 text-[10px] uppercase tracking-widest whitespace-nowrap">{note}</p>}
+      {note && <p className="mt-1 text-[10px] uppercase tracking-widest">{note}</p>}
     </div>
   );
 }
@@ -122,7 +122,7 @@ function RunView() {
         </div>
       )}
 
-      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[150px_minmax(0,1fr)_190px]">
+      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[170px_minmax(0,1fr)_190px]">
         {/* Queued invoices waiting in line */}
         <div>
           <p className="mb-3 text-xs uppercase tracking-widest text-muted-foreground">Queued</p>
@@ -140,15 +140,15 @@ function RunView() {
 
         {/* Conveyor belt with four gate stations */}
         <div className="relative min-w-0 pt-2 pb-6">
-          <div className="absolute inset-x-0 top-[92px] h-0.5 bg-border" aria-hidden="true" />
+          <div className="absolute inset-x-0 top-[26px] h-0.5 bg-border" aria-hidden="true" />
           <div
-            className={`absolute top-[70px] z-10 -translate-x-1/2 ${reducedMotion ? "" : "transition-[left] duration-1000 ease-linear"}`}
+            className={`absolute top-[4px] z-10 -translate-x-1/2 ${reducedMotion ? "" : "transition-[left] duration-1000 ease-linear"}`}
             style={{ left: slipLeft }}
             aria-hidden="true"
           >
             <Slip id="INV-4821-A" amount="$12,480" tone={caught && (running ? step > 2 : true) ? "warning" : "default"} />
           </div>
-          <div className="relative grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="relative mt-20 grid grid-cols-2 items-start gap-4 sm:grid-cols-4">
             {agents.map((a, i) => {
               const s = stationState(i);
               return (
@@ -163,8 +163,8 @@ function RunView() {
                     <span className="text-xs font-medium uppercase tracking-widest">{a.name}</span>
                     {s === "running" ? <LoaderCircle className="h-3.5 w-3.5 text-primary motion-safe:animate-spin" /> : <span className={`h-2.5 w-2.5 rounded-full ${lightClass(i)}`} aria-label={`Status: ${s}`} />}
                   </div>
-                  <div className="relative px-3 py-4">
-                    {s === "held" && <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-destructive" aria-hidden="true" />}
+                  <div className="px-3 py-4">
+                    {s === "held" && <div className="mb-3 h-1 w-full bg-destructive" aria-hidden="true" />}
                     <p className="font-mono text-2xl font-medium">{a.confidence}%</p>
                     <p className={`mt-2 min-h-8 text-xs leading-relaxed ${s === "held" ? "text-destructive" : s === "warn" || s === "flag" ? "text-warning" : "text-muted-foreground"}`}>
                       {stationLabel(i)}
