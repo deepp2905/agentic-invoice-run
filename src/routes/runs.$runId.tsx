@@ -22,7 +22,7 @@ export const Route = createFileRoute("/runs/$runId")({
   component: RunView,
 });
 
-function Slip({ id, amount, note, tone = "default" }: { id: string; amount?: string; note?: string; tone?: "default" | "warning" | "primary" }) {
+function Slip({ id, amount, note, tone = "default" }: { id: string; amount?: string | undefined; note?: string | undefined; tone?: "default" | "warning" | "primary" | undefined }) {
   const toneClass = tone === "warning" ? "border-warning text-warning" : tone === "primary" ? "border-primary text-primary" : "border-border text-foreground";
   return (
     <div className={`border bg-card px-3 py-2 ${toneClass}`}>
