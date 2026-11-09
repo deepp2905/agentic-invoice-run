@@ -35,7 +35,7 @@ function RunsPage() {
               {["Run", "Vendor", "Amount", "Status", "Date"].map((h) => (
                 <th key={h} className="px-6 py-4 font-medium">{h}</th>
               ))}
-              <th className="px-6 py-4"><span className="sr-only">Action</span></th>
+              <th className="px-6 py-4 text-right font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
