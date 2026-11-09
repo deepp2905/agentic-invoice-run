@@ -102,7 +102,7 @@
   gap: var(--node-gap);
 }
 .inspection-node-matching { width: var(--matching-node-width); border-color: var(--warning); }
-.node-heading { min-height: var(--node-heading-height); font-size: var(--node-heading-size); }
+.node-heading { min-height: var(--node-heading-height); font-size: var(--node-heading-size); white-space: nowrap; }
 .node-detail { height: auto; padding: 0; justify-content: flex-start; white-space: normal; text-align: left; font-size: var(--node-text-size); font-weight: 400; line-height: var(--node-line-height); }
 .node-invoices { display: flex; flex-direction: column; gap: var(--node-gap); }
 .confidence-caption { font-size: var(--node-caption-size); margin-top: var(--node-caption-gap); }
@@ -187,7 +187,7 @@
   --destructive-soft-hover: color-mix(in oklab, var(--destructive) 24%, var(--secondary));
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
-  --node-width: 240px;
+  --node-width: 304px;
   --matching-node-width: 336px;
   --node-text-size: 18px;
   --node-heading-size: 18px;
