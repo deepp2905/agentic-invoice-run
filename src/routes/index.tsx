@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle } from "lucide-react";
+import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { alert, runs } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";

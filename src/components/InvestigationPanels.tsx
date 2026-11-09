@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";

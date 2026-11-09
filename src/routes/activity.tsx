@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Undo2, History } from "lucide-react";
+import { IconArrowBackUp as Undo2, IconHistory as History } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";

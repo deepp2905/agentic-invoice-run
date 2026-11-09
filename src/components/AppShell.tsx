@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, ShieldCheck, History, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory as History, IconLayoutSidebarLeftCollapse as PanelLeftClose, IconLayoutSidebarLeftExpand as PanelLeftOpen } from "@tabler/icons-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 const nav = [

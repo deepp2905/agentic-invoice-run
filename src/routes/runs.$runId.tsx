@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, LoaderCircle, Pause, Pencil, Play } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconLoader2 as LoaderCircle, IconPlayerPause as Pause, IconPencil as Pencil, IconPlayerPlay as Play } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, RotateCcw, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
+import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconGripVertical as GripVertical, IconLoader2 as LoaderCircle, IconMaximize as Maximize, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
