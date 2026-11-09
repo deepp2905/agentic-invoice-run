@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
+import { Hint } from "@/components/Hint";
 import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 
@@ -26,7 +27,7 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
     {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
     <div className="flex h-11 items-center justify-between gap-2 px-3">
       <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold"><GripVertical className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" /><StationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
-      {data.agent && <Icon className={`h-3.5 w-3.5 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]}><title>{labels[data.outcome]}</title></Icon>}
+      {data.agent && <Hint label={labels[data.outcome]}><Icon className={`h-3.5 w-3.5 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]} /></Hint>}
     </div>
     {data.agent ? <>
       <div className="flex flex-col gap-1.5 px-2 pb-2">
@@ -83,11 +84,11 @@ function CanvasControls({ onReset }: { onReset: () => void }) {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { zoom } = useViewport();
   return <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded border border-border bg-card p-1">
-    <Button variant="ghost" size="icon" aria-label="Zoom out" title="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button>
+    <Hint label="Zoom out"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button></Hint>
     <span className="w-12 text-center font-mono text-[10px] text-muted-foreground">{Math.round(zoom * 100)}%</span>
-    <Button variant="ghost" size="icon" aria-label="Zoom in" title="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button>
-    <Button variant="ghost" size="icon" aria-label="Fit flow" title="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button>
-    <Button variant="ghost" size="icon" aria-label="Reset layout" title="Reset layout" onClick={onReset}><RotateCcw /></Button>
+    <Hint label="Zoom in"><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button></Hint>
+    <Hint label="Fit flow"><Button variant="ghost" size="icon" aria-label="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button></Hint>
+    <Hint label="Reset layout"><Button variant="ghost" size="icon" aria-label="Reset layout" onClick={onReset}><RotateCcw /></Button></Hint>
   </div>;
 }
 export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {

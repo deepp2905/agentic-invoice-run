@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory as History, IconLayoutSidebarLeftCollapse as PanelLeftClose, IconLayoutSidebarLeftExpand as PanelLeftOpen } from "@tabler/icons-react";
+import { Hint } from "@/components/Hint";
 import { useEffect, useState, type ReactNode } from "react";
 
 const nav = [
@@ -21,22 +22,22 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
             <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">LW</span>
             {!collapsed && <span>Ledger Watch</span>}
           </div>
-          <button onClick={toggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} title={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground">
+          <Hint label={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right"><button onClick={toggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground">
             <Toggle className="h-4 w-4" />
-          </button>
+          </button></Hint>
         </div>
         {!collapsed && <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Workspace</p>}
         <nav className="flex flex-col gap-1">
           {nav.map(({ to, label, icon: Icon, exact }) => (
-            <Link key={to} to={to} aria-label={label} title={collapsed ? label : undefined}
+            <Hint key={to} label={collapsed ? label : undefined} side="right"><Link to={to} aria-label={label}
               className={`flex items-center gap-3 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? "justify-center px-0" : "px-3"}`}
               activeProps={{ className: "bg-secondary !text-foreground" }} activeOptions={{ exact, includeSearch: false }}>
               <Icon className="h-4 w-4 shrink-0" />{!collapsed && <span>{label}</span>}
-            </Link>
+            </Link></Hint>
           ))}
         </nav>
         <div className={`mt-auto flex items-center gap-3 border-t border-border pt-4 ${collapsed ? "justify-center" : "px-2"}`}>
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground" title={collapsed ? "Neha Hiremath" : undefined}>N</span>
+          <Hint label={collapsed ? "Neha Hiremath" : undefined} side="right"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">N</span></Hint>
           {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
         </div>
       </aside>
