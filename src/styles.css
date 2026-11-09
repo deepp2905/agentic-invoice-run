@@ -132,10 +132,12 @@
   --muted-foreground: oklch(0.68 0 0);
   --accent: oklch(0.235 0 0);
   --accent-foreground: oklch(0.95 0 0);
-  --destructive: oklch(0.64 0.21 25);
+  /* One dial for state saturation: 1 = vivid, lower = calmer. */
+  --state-chroma: 0.7;
+  --destructive: oklch(0.66 calc(0.21 * var(--state-chroma)) 25);
   --destructive-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.83 0.16 85);
-  --success: oklch(0.76 0.17 155);
+  --warning: oklch(0.82 calc(0.16 * var(--state-chroma)) 85);
+  --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
   --node-width: 230px;
   --handle-size: 7px;
@@ -147,9 +149,9 @@
   --canvas-wire: oklch(0.55 0 0);
   --input: oklch(0.27 0 0);
   --ring: oklch(0.7 0 0);
-  --chart-1: oklch(0.76 0.17 155);
-  --chart-2: oklch(0.83 0.16 85);
-  --chart-3: oklch(0.64 0.21 25);
+  --chart-1: var(--success);
+  --chart-2: var(--warning);
+  --chart-3: var(--destructive);
   --chart-4: oklch(0.68 0 0);
   --chart-5: oklch(0.95 0 0);
   --sidebar: oklch(0.145 0 0);
