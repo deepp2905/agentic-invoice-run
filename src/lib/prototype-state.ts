@@ -17,7 +17,7 @@ export interface PrototypeState {
 export type PrototypeAction =
   | { type: "pause"; time: string }
   | { type: "rule"; rule: DuplicateRule; time: string }
-  | { type: "replay"; caught: boolean; time: string }
+  | { type: "replay"; caught: boolean; time: string; completedRunId?: string }
   | { type: "undo"; id: number; time: string };
 export const initialPrototypeState: PrototypeState = { paused: false, rule: "exact", log: [], nextId: 1 };
 export const queuedInvoices = [
@@ -45,7 +45,7 @@ export function prototypeReducer(state: PrototypeState, action: PrototypeAction)
     update = { rule: action.rule };
     entry = { kind: "rule", message: "Finance lead changed duplicate rule", previousRule: state.rule };
   } else if (action.type === "replay") {
-    entry = { kind: "replay", message: action.caught ? "Replay completed, duplicate caught" : "Replay completed, invoice paid again" };
+    entry = { kind: "replay", message: action.completedRunId ? `Replay completed for ${action.completedRunId}, payment verified` : action.caught ? "Replay completed, duplicate caught" : "Replay completed, invoice paid again" };
   } else {
     const target = state.log.find((item) => item.id === action.id);
     if (!target || target.undone || (target.kind !== "pause" && target.kind !== "rule")) return state;
