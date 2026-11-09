@@ -25,6 +25,9 @@ export const queuedInvoices = [
   { id: "INV-4821-C", vendor: "Harbor Office Supply", amount: "$12,480", po: "PO-7710", legit: false },
   { id: "INV-4821-D", vendor: "Harbor Office Supply", amount: "$3,150", po: "PO-7742", legit: true },
 ];
+export function queuedInvoiceState(invoice: { legit: boolean }, paused: boolean): "safe" | "paused" | "queued" {
+  return invoice.legit ? "safe" : paused ? "paused" : "queued";
+}
 export function replayOutcome(rule: DuplicateRule) {
   return { caught: rule === "combined", payment: rule === "combined" ? "held" : "paid" } as const;
 }
@@ -34,9 +37,11 @@ export function prototypeReducer(state: PrototypeState, action: PrototypeAction)
   if (action.type === "pause") {
     if (state.paused) return state;
     update = { paused: true };
-    entry = { kind: "pause", message: "Finance lead paused 3 queued runs" };
+    entry = { kind: "pause", message: "Finance lead paused 2 queued runs" };
   } else if (action.type === "rule") {
     if (state.rule === action.rule) return state;
+    // Restoring the old rule must be an explicit, recorded Activity undo.
+    if (state.rule === "combined" && action.rule === "exact") return state;
     update = { rule: action.rule };
     entry = { kind: "rule", message: "Finance lead changed duplicate rule", previousRule: state.rule };
   } else if (action.type === "replay") {
@@ -49,7 +54,7 @@ export function prototypeReducer(state: PrototypeState, action: PrototypeAction)
     if (latest?.id !== target.id) return state;
     update = target.kind === "pause" ? { paused: false } : { rule: target.previousRule ?? "exact" };
     update.log = state.log.map((item) => item.id === target.id ? { ...item, undone: true } : item);
-    entry = { kind: "undo", message: target.kind === "pause" ? "Finance lead resumed 3 queued runs" : "Finance lead restored duplicate rule" };
+    entry = { kind: "undo", message: target.kind === "pause" ? "Finance lead resumed 2 queued runs" : "Finance lead restored duplicate rule" };
   }
   return { ...state, ...update, nextId: state.nextId + 1, log: [{ ...entry, id: state.nextId, time: action.time }, ...(update.log ?? state.log)] };
 }

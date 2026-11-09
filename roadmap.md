@@ -1,4 +1,5 @@
 # Prototype additions
+- [ ] Correct saved-rule replay and toast sequencing; pause only duplicates; separate controls and clear edge labels; verify Undo and replay
 - [x] Left-to-right rows, elbow handoff, compact nodes/header, interruptible focus, centered toasts, instant pause, and regression verification
 - [x] Enlarge the fitted canvas and Matching, label handoffs, relocate toasts, and verify held replay plus existing actions
 - [x] Green successful-node borders and incoming strings, icon-free details buttons, and curve-aligned arrowheads; verify canvas
