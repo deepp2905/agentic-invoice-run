@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
+import { Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, RotateCcw, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
@@ -77,14 +77,15 @@ const edgeTypes = { string: StringEdge };
 const positions = [{ x: 0, y: 100 }, { x: 270, y: 80 }, { x: 540, y: 115 }, { x: 810, y: 85 }, { x: 1080, y: 110 }, { x: 1350, y: 90 }];
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
-function CanvasControls() {
+function CanvasControls({ onReset }: { onReset: () => void }) {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { zoom } = useViewport();
   return <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded border border-border bg-card p-1">
     <Button variant="ghost" size="icon" aria-label="Zoom out" title="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button>
-    <Button variant="ghost" size="icon" aria-label="Fit flow" title="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button>
-    <Button variant="ghost" size="icon" aria-label="Zoom in" title="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button>
     <span className="w-12 text-center font-mono text-[10px] text-muted-foreground">{Math.round(zoom * 100)}%</span>
+    <Button variant="ghost" size="icon" aria-label="Zoom in" title="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button>
+    <Button variant="ghost" size="icon" aria-label="Fit flow" title="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button>
+    <Button variant="ghost" size="icon" aria-label="Reset layout" title="Reset layout" onClick={onReset}><RotateCcw /></Button>
   </div>;
 }
 export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {
@@ -99,7 +100,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
     const frame = requestAnimationFrame(() => { fitView({ padding: 0.15 }); fitted.current = true; });
     return () => cancelAnimationFrame(frame);
   }, [initialized, fitView]);
-  const [nodes, , onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
+  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
   const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? 230, height: node.measured?.height ?? 250 }));
   const connections = flowConnections(bounds);
   const visibleNodes = nodes.map((node, i) => {
@@ -112,7 +113,10 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
-      <CanvasControls />
+      <CanvasControls onReset={() => {
+        setNodes(current => current.map((node, i) => ({ ...node, position: positions[i] ?? node.position })));
+        requestAnimationFrame(() => fitView({ padding: 0.15, duration: 300 }));
+      }} />
     </ReactFlow>
   </div>;
 }
