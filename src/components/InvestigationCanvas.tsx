@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
+import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 
 type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
@@ -74,7 +75,7 @@ function StringEdge(props: EdgeProps) {
 }
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
-const positions = [{ x: 0, y: 100 }, { x: 270, y: 80 }, { x: 540, y: 115 }, { x: 810, y: 85 }, { x: 1080, y: 110 }, { x: 1350, y: 90 }];
+const positions = [{ x: 0, y: 100 }, { x: 340, y: 80 }, { x: 680, y: 115 }, { x: 1020, y: 85 }, { x: 1360, y: 110 }, { x: 1700, y: 90 }];
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls({ onReset }: { onReset: () => void }) {
@@ -111,7 +112,12 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, successful: visibleNodes[i + 1]?.data.outcome === "success" } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
-    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} proOptions={{ hideAttribution: true }}>
+    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStop={(_, dragged) => setNodes(current => {
+        const size = (n: FlowNode) => ({ width: n.measured?.width ?? 230, height: n.measured?.height ?? 250 });
+        const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
+        const position = resolveOverlap({ ...dragged.position, ...size(dragged) }, others);
+        return current.map(n => n.id === dragged.id ? { ...n, position } : n);
+      })} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
       <CanvasControls onReset={() => {
         setNodes(current => current.map((node, i) => ({ ...node, position: positions[i] ?? node.position })));
