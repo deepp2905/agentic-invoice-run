@@ -31,16 +31,16 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
   return <div className={`inspection-node ${warningMatch ? "inspection-node-matching" : ""} outcome-${data.outcome}`}>
     {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
     <div className="node-heading flex items-center justify-between gap-2">
-      <span className="flex min-w-0 items-center gap-2 font-semibold">{!matching && <StationIcon className="size-4 shrink-0" aria-hidden="true" />}{data.agent ? titles[id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
-      {data.agent && <Hint label={warningMatch ? "Low match confidence" : labels[data.outcome]}><Icon className={`size-4 shrink-0 ${warningMatch ? "text-warning" : "node-status"} ${data.outcome === "running" && !matching ? "motion-safe:animate-spin" : ""}`} aria-label={warningMatch ? "Warning" : labels[data.outcome]} /></Hint>}
+      <span className="flex min-w-0 items-center gap-2 font-semibold">{!warningMatch && <StationIcon className="size-4 shrink-0" aria-hidden="true" />}{data.agent ? titles[id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
+      {data.agent && <Hint label={warningMatch ? "Low match confidence" : labels[data.outcome]}><Icon className={`size-4 shrink-0 ${warningMatch ? "text-warning" : "node-status"} ${data.outcome === "running" && !warningMatch ? "motion-safe:animate-spin" : ""}`} aria-label={warningMatch ? "Warning" : labels[data.outcome]} /></Hint>}
     </div>
-    {matching ? <>
+    {warningMatch ? <>
       <div><p className={`confidence-value font-mono font-semibold ${warningMatch ? "text-warning" : "text-success"}`}>{data.count}%</p><p className="confidence-caption text-muted-foreground">match confidence</p></div>
       <div className="confidence-meter" role="meter" aria-label="Matching confidence" aria-valuemin={0} aria-valuemax={100} aria-valuenow={data.agent?.confidence}><div className={`h-full ${warningMatch ? "bg-warning" : "bg-success"}`} style={{ width: `${data.count}%` }} /></div>
       <Chip tone={warningMatch ? "warning" : "success"} className="node-tag">{warningMatch ? "Should have been caught" : "Verified PO match"}</Chip>
       <Button variant="outline" className="node-review nodrag nopan w-full shadow-none" aria-label="Matching: Review match" onClick={inspect}>Review match</Button>
     </> : data.agent ? <>
-      <Button variant="ghost" className="node-detail nodrag nopan" aria-label={`Open ${data.agent.name} details`} onClick={inspect}>{data.detail}</Button>
+      <Button variant="ghost" className="node-detail nodrag nopan" aria-label={matching ? "Matching: Review match" : `Open ${data.agent.name} details`} onClick={inspect}>{data.detail}</Button>
       {data.outcome === "failed" && <Button variant="destructive" className="nodrag nopan w-full" aria-label="Policy: Review hold" onClick={inspect}>Review hold</Button>}
     </> : data.kind === "queue" ? <div className="node-invoices">{data.run.queue.map(invoice => {
       const status = queuedInvoiceState(invoice, data.paused);
@@ -160,7 +160,7 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
   if (connections[2]) { connections[2].source = "bottom"; connections[2].target = "top"; }
   const visibleNodes = nodes.map((node, i) => {
     const outcome = !run.duplicate && !replay ? "success" : nodeOutcome(i - 1, replay);
-    const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? `Processing ${run.id}` : i === 1 ? `${run.id} · ${run.amount}` : i === 3 ? outcome === "failed" ? "Held for review" : "Duplicate check passed" : i === 4 ? outcome === "skipped" ? "Not paid" : `Paid ${run.amount}` : "";
+    const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? `Processing ${run.id}` : i === 1 ? `${run.id} · ${run.amount}` : i === 2 ? `${run.po} · ${run.agents[1]?.confidence ?? 0}% match` : i === 3 ? outcome === "failed" ? "Held for review" : "Duplicate check passed" : i === 4 ? outcome === "skipped" ? "Not paid" : `Paid ${run.amount}` : "";
     return { ...node, className: focus === node.id ? `canvas-node-focused ${node.id === "matching" && run.duplicate ? "canvas-match-focused" : ""}` : focus ? "canvas-node-dimmed" : "", data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: hasNewReceipt(replay), count } };
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => {
