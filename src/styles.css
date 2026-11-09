@@ -85,6 +85,11 @@
 }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
 .inspection-node .react-flow__handle { width: 8px; height: 8px; min-width: 8px; min-height: 8px; }
+.inspection-node .connection-target { opacity: 0; pointer-events: none; }
+.investigation-canvas .react-flow__arrowhead { fill: var(--muted-foreground); stroke: var(--muted-foreground); }
+.toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--primary); }
+.toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--warning); }
+.toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--destructive); }
 .outcome-running { border-color: var(--primary); }
 .outcome-running .node-status, .outcome-success .node-status { color: var(--primary); }
 .outcome-warning { border-color: var(--warning); }

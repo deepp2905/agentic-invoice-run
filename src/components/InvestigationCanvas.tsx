@@ -1,33 +1,38 @@
-import { useMemo } from "react";
-import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesState, useReactFlow, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { Check, CircleDashed, Grip, LoaderCircle, Maximize, Minus, Plus, SkipForward, AlertTriangle, X } from "lucide-react";
+import { useEffect } from "react";
+import { Background, BackgroundVariant, BaseEdge, Handle, MarkerType, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+import { ArrowUpRight, Check, CircleDashed, GripVertical, LoaderCircle, Maximize, Minus, Plus, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
+import { connectionSides, type ConnectionSide } from "@/lib/flow-connections";
 
-type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; onInspect: (agent: Agent) => void };
+type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
 const icons = { pending: CircleDashed, running: LoaderCircle, success: Check, warning: AlertTriangle, failed: X, skipped: SkipForward };
 const labels = { pending: "Waiting", running: "Running…", success: "Successful", warning: "Warning", failed: "Held for review", skipped: "Skipped · Not paid" };
 
-function InspectionNode({ data }: NodeProps<FlowNode>) {
+const sidePositions = { left: Position.Left, right: Position.Right, top: Position.Top, bottom: Position.Bottom };
+const titles: Record<string, string> = { extraction: "Read invoice", matching: "Match purchase order", policy: "Check duplicates", payment: "Issue payment" };
+
+function InspectionNode({ id, data }: NodeProps<FlowNode>) {
   const Icon = icons[data.outcome];
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => { updateNodeInternals(id); }, [id, data.incoming, data.outgoing, updateNodeInternals]);
   return <div className={`inspection-node outcome-${data.outcome}`}>
-    <Handle type="target" position={Position.Left} id="left" />
-    <Handle type="target" position={Position.Top} id="top" />
+    {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
     <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-      <span className="text-xs font-semibold uppercase">{data.agent?.name ?? (data.kind === "queue" ? "Queue" : "Output tray")}</span>
-      <Grip className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <span className="flex items-center gap-2 text-xs font-semibold"><GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
+      {data.agent && <Icon className={`h-4 w-4 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]}><title>{labels[data.outcome]}</title></Icon>}
     </div>
     {data.agent ? <>
-      <Button variant="ghost" className="nodrag h-auto w-full justify-start rounded-none px-4 py-4 text-left" aria-label={`${data.agent.name} station`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>
-        <span className="flex w-full flex-col gap-2">
+      <div className="flex flex-col gap-3 p-4">
+        <span className="text-[10px] uppercase text-muted-foreground">{data.agent.name}</span>
           <span className="flex items-baseline justify-between"><span className="font-mono text-3xl">{data.agent.confidence}%</span><span className="text-[10px] font-normal text-muted-foreground">CONFIDENCE</span></span>
-          <span className="whitespace-normal text-xs font-normal leading-relaxed text-muted-foreground">{data.detail}</span>
-        </span>
-      </Button>
-      <div className="node-status flex items-center gap-2 border-t border-border px-4 py-3 text-xs" role="status"><Icon className={`h-3.5 w-3.5 ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} />{labels[data.outcome]}</div>
+          <p className="min-h-10 text-xs leading-relaxed text-muted-foreground">{data.detail}</p>
+          {data.outcome !== "success" && <span className="node-status text-xs" role="status">{labels[data.outcome]}</span>}
+          <Button variant="outline" size="sm" className={`nodrag nopan w-fit rounded-full px-3 shadow-none ${data.outcome === "warning" ? "border-warning/50 text-warning" : data.outcome === "failed" ? "border-destructive/50 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}<ArrowUpRight className="h-3.5 w-3.5" /></Button>
+      </div>
     </> : <div className="space-y-2 p-4">
       {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`border px-3 py-2 ${invoice.legit ? "border-primary/40 text-primary" : data.paused ? "border-warning/40 text-warning" : "border-border"}`}>
         <p className="font-mono text-xs">{invoice.id}</p><p className="mt-1 text-[10px]">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
@@ -36,10 +41,7 @@ function InspectionNode({ data }: NodeProps<FlowNode>) {
         {data.paidAgain && <div className="border border-destructive px-3 py-3 text-destructive"><p className="font-mono text-xs">INV-4821-A</p><p className="mt-1 text-[10px]">Paid again · $12,480</p></div>}
       </>}
     </div>}
-    <Handle type="source" position={Position.Right} id="right" />
-    <Handle type="source" position={Position.Bottom} id="bottom" />
-    <Handle type="source" position={Position.Left} id="out-left" />
-    <Handle type="target" position={Position.Right} id="in-right" />
+    {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
   </div>;
 }
 
@@ -54,13 +56,13 @@ function StringEdge(props: EdgeProps) {
       : bezier;
   const active = props.data?.['active'] === true;
   return <g className={`flow-string ${active ? "flow-string-active" : ""}`}>
-    <BaseEdge id={props.id} path={path} />
+    <BaseEdge id={props.id} path={path} markerEnd={props.markerEnd} />
     {active && <path d={path} className="flow-string-pulse" />}
   </g>;
 }
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
-const positions = [{ x: 0, y: 150 }, { x: 310, y: 50 }, { x: 620, y: 150 }, { x: 930, y: 50 }, { x: 930, y: 400 }, { x: 560, y: 430 }];
+const positions = [{ x: 0, y: 100 }, { x: 310, y: 75 }, { x: 620, y: 110 }, { x: 930, y: 80 }, { x: 1240, y: 105 }, { x: 1550, y: 85 }];
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls() {
@@ -78,13 +80,15 @@ export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: 
 }
 function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {
   const [nodes, , onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
+  const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? 230, height: node.measured?.height ?? 250 }));
+  const connections = bounds.slice(0, -1).map((source, i) => connectionSides(source, bounds[i + 1] ?? source));
   const visibleNodes = nodes.map((node, i) => {
     const outcome = nodeOutcome(i - 1, replay);
     const combined = replay?.rule === "combined";
     const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? "INV-4821-A · $12,480" : i === 2 ? combined ? "Possible duplicate of INV-4821" : "62%, handed off without a flag" : i === 3 && combined ? "Duplicate check failed · Payment held" : i === 4 && combined ? "Blocked by Policy" : agents[i - 1]?.summary ?? "";
-    return { ...node, data: { ...node.data, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: replay?.phase === "complete" && !combined } };
+    return { ...node, data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: replay?.phase === "complete" && !combined } };
   });
-  const edges = useMemo<Edge[]>(() => ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: i === 3 ? "bottom" : i === 4 ? "out-left" : "right", targetHandle: i === 3 ? "top" : i === 4 ? "in-right" : "left", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1 } })), [replay]);
+  const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 }, data: { active: replay?.phase === "handoff" && replay.index === i - 1 } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />

@@ -7,6 +7,9 @@ import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { InvestigationPanels, type InvestigationPanel } from "@/components/InvestigationPanels";
 import { InvestigationCanvas } from "@/components/InvestigationCanvas";
 import { advanceReplay, startReplay, type ReplayFlow } from "@/lib/replay-flow";
+import { nodeOutcome } from "@/lib/replay-flow";
+import { agents } from "@/lib/mock-data";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/runs/$runId")({
   head: ({ params }) => ({
@@ -33,7 +36,17 @@ function RunView() {
     if (!replay || replay.phase === "complete") return;
     const timer = setTimeout(() => {
       const next = advanceReplay(replay);
-      if (next.phase === "complete") dispatch({ type: "replay", caught: next.rule === "combined", time: actionTime() });
+      if (replay.phase === "running") {
+        const name = agents[replay.index]?.name ?? "Agent";
+        const outcome = nodeOutcome(replay.index, next);
+        if (outcome === "warning") toast.warning(`${name} needs review`, { description: "62% confidence · Handed off without a flag", duration: 3500 });
+        else if (outcome === "failed") toast.error(`${name} held payment`, { description: "Duplicate caught · Payment skipped", duration: 4500 });
+        else toast.success(`${name} completed`, { duration: 2500 });
+      }
+      if (next.phase === "complete") {
+        dispatch({ type: "replay", caught: next.rule === "combined", time: actionTime() });
+        if (next.rule === "exact") toast.error("Run completed with a duplicate payment", { description: "$12,480 paid again · Duplicate was not caught", duration: 5000 });
+      }
       setReplay(next);
     }, replay.phase === "running" ? 1100 : 550);
     return () => clearTimeout(timer);
