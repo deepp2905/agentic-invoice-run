@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconGripVertical as GripVertical, IconLoader2 as LoaderCircle, IconMaximize as Maximize, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
+import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconLoader2 as LoaderCircle, IconMaximize as Maximize, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
@@ -26,22 +26,22 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
   const updateNodeInternals = useUpdateNodeInternals();
   useEffect(() => { updateNodeInternals(id); }, [id, data.incoming, data.outgoing, updateNodeInternals]);
   const review = data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : null;
-  return <div className={`inspection-node outcome-${data.outcome} ${data.agent ? "inspection-node-clickable" : ""}`} title={undefined}>
+  return <div className={`inspection-node outcome-${data.outcome}`}>
     {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
     <div className="flex h-11 items-center justify-between gap-2 px-3">
-      <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold"><GripVertical className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" /><StationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
+      <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold"><StationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
       {data.agent && <Hint label={labels[data.outcome]}><Icon className={`h-3.5 w-3.5 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]} /></Hint>}
     </div>
     {data.agent ? <>
       <div className="flex flex-col gap-1.5 px-2 pb-2">
-        <InsetRow>
+        <InsetRow className="nodrag cursor-pointer" onClick={() => { if (data.agent) data.onInspect(data.agent); }} label={`Open ${data.agent.name} details`}>
           <p className="mb-1 text-2xs text-muted-foreground">{data.agent.name}</p>
           <p className="min-h-8 text-caption leading-relaxed">{data.detail}</p>
         </InsetRow>
         {data.agent.confidence < LOW_CONFIDENCE && <InsetRow className="flex items-center justify-between py-1.5 text-2xs text-warning"><span>Low confidence</span><span className="font-mono">{data.agent.confidence}%</span></InsetRow>}
         {(review || (data.outcome !== "success" && data.outcome !== "warning")) && <div className="flex h-9 items-center justify-between gap-2 px-1">
           {data.outcome !== "warning" && data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
-          {review && <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : "border-destructive/30 text-destructive"}`} aria-label={`${data.agent.name}: ${review}`} onClick={(e) => { e.stopPropagation(); if (data.agent) data.onInspect(data.agent); }}>{review}</Button>}
+          {review && <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning hover:bg-warning/10 hover:text-warning" : "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"}`} aria-label={`${data.agent.name}: ${review}`} onClick={(e) => { e.stopPropagation(); if (data.agent) data.onInspect(data.agent); }}>{review}</Button>}
         </div>}
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">
@@ -117,7 +117,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state: visibleNodes[i]?.data.outcome } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
-    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeClick={(_, node) => { if (node.data.agent) onInspect(node.data.agent); }} onNodeDragStop={(_, dragged) => setNodes(current => {
+    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStop={(_, dragged) => setNodes(current => {
         const size = (n: FlowNode) => ({ width: n.measured?.width ?? 230, height: n.measured?.height ?? 250 });
         const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
         const position = resolveOverlap({ ...dragged.position, ...size(dragged) }, others);

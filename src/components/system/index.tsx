@@ -40,8 +40,10 @@ export function Notice({ tone, size, icon: Icon, action, className, children, ro
   </div>;
 }
 
-export function InsetRow({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("rounded-md bg-muted/50 px-2.5 py-2", className)}>{children}</div>;
+export function InsetRow({ className, children, onClick, label }: { className?: string; children: ReactNode; onClick?: () => void; label?: string }) {
+  const classes = cn("rounded-md bg-muted/50 px-2.5 py-2", className);
+  if (onClick) return <div role="button" tabIndex={0} aria-label={label} className={classes} onClick={onClick} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}>{children}</div>;
+  return <div className={classes}>{children}</div>;
 }
 
 export function Surface({ className, children }: { className?: string; children: ReactNode }) {
