@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory as History, IconLayoutSidebarLeftCollapse as PanelLeftClose, IconLayoutSidebarLeftExpand as PanelLeftOpen } from "@tabler/icons-react";
 import { Hint } from "@/components/Hint";
+import { Avatar } from "@/components/system";
 import { useEffect, useState, type ReactNode } from "react";
 
 const nav = [
@@ -37,7 +38,7 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
           ))}
         </nav>
         <div className={`mt-auto flex items-center gap-3 border-t border-border pt-4 ${collapsed ? "justify-center" : "px-2"}`}>
-          <Hint label={collapsed ? "Neha Hiremath" : undefined} side="right"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">N</span></Hint>
+          <Avatar name="Neha Hiremath" label={collapsed ? "Neha Hiremath" : undefined} />
           {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
         </div>
       </aside>

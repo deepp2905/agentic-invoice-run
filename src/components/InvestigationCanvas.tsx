@@ -6,6 +6,7 @@ import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
 import { Hint } from "@/components/Hint";
+import { IconButton, InsetRow } from "@/components/system";
 import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 
@@ -34,8 +35,8 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
         <InsetRow>
           <p className="mb-1 text-2xs text-muted-foreground">{data.agent.name}</p>
           <p className="min-h-8 text-caption leading-relaxed">{data.detail}</p>
-        </div>
-        <div className="flex h-7 items-center justify-between rounded-md bg-muted/50 px-2.5 text-2xs"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></div>
+        </InsetRow>
+        <InsetRow className="flex items-center justify-between py-1.5 text-2xs"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></InsetRow>
         <div className="flex h-9 items-center justify-between gap-2 px-1">
           {data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
            <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : data.outcome === "failed" ? "border-destructive/30 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}</Button>
@@ -44,9 +45,9 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
     </> : <div className="space-y-1.5 px-2 pb-2">
       {data.kind === "queue" ? queuedInvoices.map(invoice => <InsetRow key={invoice.id} className={invoice.legit ? "text-success" : data.paused ? "text-warning" : "text-foreground"}>
         <p className="font-mono text-caption">{invoice.id}</p><p className="mt-1 text-2xs text-muted-foreground">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
-      </div>) : <>
-        <InsetRow><p className="font-mono text-caption">INV-4821</p><p className="mt-1 text-2xs text-muted-foreground">Paid Oct 29 · $12,480</p></div>
-        {data.paidAgain && <InsetRow className="bg-destructive/10 text-destructive"><p className="font-mono text-caption">INV-4821-A</p><p className="mt-1 text-2xs">Paid again · $12,480</p></div>}
+      </InsetRow>) : <>
+        <InsetRow><p className="font-mono text-caption">INV-4821</p><p className="mt-1 text-2xs text-muted-foreground">Paid Oct 29 · $12,480</p></InsetRow>
+        {data.paidAgain && <InsetRow className="bg-destructive/10 text-destructive"><p className="font-mono text-caption">INV-4821-A</p><p className="mt-1 text-2xs">Paid again · $12,480</p></InsetRow>}
       </>}
     </div>}
     {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
@@ -110,7 +111,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
     const outcome = nodeOutcome(i - 1, replay);
     const combined = replay?.rule === "combined";
     const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? "INV-4821-A · $12,480" : i === 2 ? combined ? "Possible duplicate of INV-4821" : "62%, handed off without a flag" : i === 3 && combined ? "Duplicate check failed · Payment held" : i === 4 && combined ? "Blocked by Policy" : agents[i - 1]?.summary ?? "";
-    return { ...node, data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: replay?.phase === "complete" && !combined } };
+    return { ...node, data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 ? "pending" as const : i === 5 ? (nodeOutcome(3, replay) === "success" ? "success" as const : "pending" as const) : outcome, detail, paused, onInspect, paidAgain: replay?.phase === "complete" && !combined } };
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state: visibleNodes[i]?.data.outcome } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
