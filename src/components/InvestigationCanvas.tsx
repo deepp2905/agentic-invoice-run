@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Background, BackgroundVariant, BaseEdge, EdgeLabelRenderer, Handle, Position, ReactFlow, ReactFlowProvider, getViewportForBounds, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps, type Viewport } from "@xyflow/react";
-import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconLoader2 as LoaderCircle, IconMaximize as Maximize, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
+import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconLoader2 as LoaderCircle, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import type { Agent } from "@/lib/mock-data";
 import type { RunDetail } from "@/lib/mock-runs";
@@ -92,7 +92,6 @@ function CanvasControls({ onFull, onReset, onInterrupt }: { onFull: () => void; 
     <IconButton label="Zoom out" icon={Minus} onClick={() => { onInterrupt(); zoomOut(); }} />
     <span className="w-12 text-center font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
     <IconButton label="Zoom in" icon={Plus} onClick={() => { onInterrupt(); zoomIn(); }} />
-    <IconButton label="Fit flow" icon={Maximize} onClick={onFull} />
     <IconButton label="Reset layout" icon={RotateCcw} onClick={onReset} />
   </div></div>;
 }
