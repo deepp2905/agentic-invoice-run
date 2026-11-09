@@ -47,7 +47,7 @@ function RunsPage() {
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
                 <td className="px-6 py-4 text-right">
-                  <Button asChild size="sm" className="w-32 justify-between" variant={r.id.startsWith("INV-4821") ? "destructive" : "secondary"}>
+                  <Button asChild size="sm" className="w-32 justify-between" variant={r.id.startsWith("INV-4821") ? "warning" : "secondary"}>
                     <Link to="/runs/$runId" params={{ runId: r.id.startsWith("INV-4821") ? alert.runId : r.id }}>
                       {r.id.startsWith("INV-4821") ? "Investigate" : "View run"}
                       <ArrowRight className="size-4" />
