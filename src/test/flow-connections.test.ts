@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { connectionSides } from "@/lib/flow-connections";
+import { connectionSides, flowConnections } from "@/lib/flow-connections";
 
 const card = { x: 0, y: 0, width: 230, height: 240 };
 describe("Facing connection edges", () => {
@@ -17,5 +17,30 @@ describe("Facing connection edges", () => {
   });
   it("keeps a gently staggered row horizontally connected", () => {
     expect(connectionSides(card, { ...card, x: 310, y: 28 })).toEqual({ source: "right", target: "left" });
+  });
+});
+
+describe("Joint entry and exit routing", () => {
+  it("keeps entry and exit separate when both neighbors are left", () => {
+    const connections = flowConnections([card, { ...card, x: 640 }, { ...card, x: 320 }]);
+    expect(connections).toEqual([{ source: "right", target: "bottom" }, { source: "left", target: "right" }]);
+  });
+  it("adjusts exit instead when entry is more strongly aligned", () => {
+    const connections = flowConnections([card, { ...card, x: 640 }, { ...card, x: 320, y: 120 }]);
+    expect(connections).toEqual([{ source: "right", target: "left" }, { source: "bottom", target: "right" }]);
+  });
+  it("keeps entry and exit separate when both neighbors are above", () => {
+    const connections = flowConnections([card, { ...card, y: 700 }, { ...card, y: 350 }]);
+    expect(connections).toEqual([{ source: "bottom", target: "right" }, { source: "top", target: "bottom" }]);
+  });
+  it("preserves the default left-to-right row", () => {
+    expect(flowConnections([card, { ...card, x: 320 }, { ...card, x: 640 }])).toEqual([{ source: "right", target: "left" }, { source: "right", target: "left" }]);
+  });
+  it("never shares entry and exit across folded layouts", () => {
+    for (const x of [-640, 0, 640]) for (const y of [-700, 0, 700]) {
+      const connections = flowConnections([card, { ...card, x, y }, { ...card, x: 320, y: 350 }, { ...card, x: -320, y: -350 }]);
+      expect(connections[0]?.target).not.toBe(connections[1]?.source);
+      expect(connections[1]?.target).not.toBe(connections[2]?.source);
+    }
   });
 });

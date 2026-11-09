@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
-import { connectionSides, type ConnectionSide } from "@/lib/flow-connections";
+import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 
 type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
@@ -53,8 +53,8 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
 
 function StringEdge(props: EdgeProps) {
   const [bezier] = getBezierPath({ ...props, curvature: 0.55 });
-  const vertical = Math.abs(props.sourceX - props.targetX) < 20;
-  const horizontal = Math.abs(props.sourceY - props.targetY) < 20;
+  const vertical = Math.abs(props.sourceX - props.targetX) < 20 && ((props.sourcePosition === Position.Bottom && props.targetPosition === Position.Top) || (props.sourcePosition === Position.Top && props.targetPosition === Position.Bottom));
+  const horizontal = Math.abs(props.sourceY - props.targetY) < 20 && ((props.sourcePosition === Position.Right && props.targetPosition === Position.Left) || (props.sourcePosition === Position.Left && props.targetPosition === Position.Right));
   const path = vertical
     ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + 50},${props.sourceY + (props.targetY - props.sourceY) / 3} ${props.targetX + 50},${props.targetY - (props.targetY - props.sourceY) / 3} ${props.targetX},${props.targetY}`
     : horizontal
@@ -95,7 +95,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   }, [initialized, fitView]);
   const [nodes, , onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
   const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? 230, height: node.measured?.height ?? 250 }));
-  const connections = bounds.slice(0, -1).map((source, i) => connectionSides(source, bounds[i + 1] ?? source));
+  const connections = flowConnections(bounds);
   const visibleNodes = nodes.map((node, i) => {
     const outcome = nodeOutcome(i - 1, replay);
     const combined = replay?.rule === "combined";
