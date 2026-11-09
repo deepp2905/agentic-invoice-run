@@ -20,13 +20,13 @@
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 2.5);
+  --radius-4xl: calc(var(--radius) * 3);
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Oswald", "Archivo", ui-sans-serif, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -78,7 +78,7 @@
 .inspection-node {
   width: 230px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-xl);
   background: var(--card);
   color: var(--foreground);
   cursor: grab;
@@ -107,7 +107,7 @@
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0.5rem;
   /* Background #0E0F11, panels #1A1C20, text #ECEAE4, dim #8B8E94,
      hazard yellow #FFC400, red #FF4B3E, green #3DDC97 */
   --background: oklch(0.165 0.005 260);
@@ -127,10 +127,10 @@
   --destructive: oklch(0.63 0.22 27);
   --destructive-foreground: oklch(0.165 0.005 260);
   --warning: oklch(0.83 0.16 90);
-  --border: oklch(0.32 0.01 260);
+  --border: oklch(0.44 0.012 260);
   --canvas-dot: oklch(0.26 0.006 260);
   --canvas-wire: oklch(0.72 0.008 260);
-  --input: oklch(0.32 0.01 260);
+  --input: oklch(0.44 0.012 260);
   --ring: oklch(0.79 0.17 160);
   --chart-1: oklch(0.79 0.17 160);
   --chart-2: oklch(0.83 0.16 90);
@@ -143,7 +143,7 @@
   --sidebar-primary-foreground: oklch(0.165 0.005 260);
   --sidebar-accent: oklch(0.26 0.008 260);
   --sidebar-accent-foreground: oklch(0.93 0.008 90);
-  --sidebar-border: oklch(0.32 0.01 260);
+  --sidebar-border: oklch(0.44 0.012 260);
   --sidebar-ring: oklch(0.79 0.17 160);
 }
 
