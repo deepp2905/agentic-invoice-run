@@ -38,9 +38,13 @@ function RunView() {
     const element = footer.current;
     if (!element) return;
     document.body.classList.add("run-toasts");
-    const update = () => document.body.style.setProperty("--run-toast-bottom", `${element.getBoundingClientRect().height + 16}px`);
+    const band = document.querySelector(".canvas-control-band");
+    const update = () => {
+      const top = band?.getBoundingClientRect().top ?? element.getBoundingClientRect().top;
+      document.body.style.setProperty("--run-toast-bottom", `${window.innerHeight - top + 16}px`);
+    };
     const observer = new ResizeObserver(update);
-    observer.observe(element); update();
+    observer.observe(element); if (band) observer.observe(band); update();
     return () => { observer.disconnect(); document.body.classList.remove("run-toasts"); document.body.style.removeProperty("--run-toast-bottom"); };
   }, []);
   useEffect(() => {
