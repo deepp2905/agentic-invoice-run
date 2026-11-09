@@ -1,4 +1,5 @@
 # Prototype additions
+- [x] Left-to-right rows, elbow handoff, compact nodes/header, interruptible focus, centered toasts, instant pause, and regression verification
 - [x] Enlarge the fitted canvas and Matching, label handoffs, relocate toasts, and verify held replay plus existing actions
 - [x] Green successful-node borders and incoming strings, icon-free details buttons, and curve-aligned arrowheads; verify canvas
 - [x] Joint incoming/outgoing routing with distinct edge centers; test and verify drag conflicts

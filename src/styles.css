@@ -96,9 +96,23 @@
   background: var(--card);
   color: var(--foreground);
   cursor: grab;
+  padding: var(--node-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--node-gap);
 }
 .inspection-node-matching { width: var(--matching-node-width); border-color: var(--warning); }
 .node-heading { min-height: var(--node-heading-height); font-size: var(--node-heading-size); }
+.node-detail { height: auto; padding: 0; justify-content: flex-start; white-space: normal; text-align: left; font-size: var(--node-text-size); font-weight: 400; line-height: var(--node-line-height); }
+.node-invoices { display: flex; flex-direction: column; gap: var(--node-gap); }
+.confidence-caption { font-size: var(--node-caption-size); margin-top: var(--node-caption-gap); }
+.canvas-node-dimmed { opacity: var(--canvas-dimmed-opacity); }
+.canvas-is-focused .react-flow__edges, .canvas-is-focused .react-flow__edgelabel-renderer { opacity: var(--canvas-edge-opacity); }
+.canvas-match-focused .inspection-node { box-shadow: var(--matching-glow); animation: match-border-pulse 700ms ease-in-out 2; }
+@keyframes match-border-pulse { 50% { box-shadow: var(--matching-pulse); } }
+.canvas-node-focused, .canvas-node-dimmed { transition: opacity 200ms ease; }
+.run-header { min-height: var(--run-header-height); }
+.run-toasts [data-sonner-toaster] { bottom: var(--run-toast-bottom) !important; }
 .node-actions { min-height: var(--node-actions-height); }
 .node-review, .node-tag { font-size: var(--node-text-size); }
 .node-review { min-height: var(--node-actions-height); }
@@ -106,7 +120,8 @@
 .confidence-meter { height: var(--confidence-meter-height); background: var(--secondary); border-radius: var(--radius-sm); overflow: hidden; }
 .confidence-meter-fill { width: 62%; height: 100%; background: var(--warning); }
 .outcome-skipped { background: var(--muted-surface); border-color: var(--border); color: var(--muted-foreground); }
-.flow-edge-label { position: absolute; max-width: var(--edge-label-width); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
+.flow-edge-label { position: absolute; width: var(--edge-label-width); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
+.flow-edge-label-elbow { width: auto; white-space: nowrap; }
 .flow-edge-label-vertical { max-width: var(--edge-label-vertical-width); }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
 .inspection-node .react-flow__handle { width: var(--handle-size); height: var(--handle-size); min-width: var(--handle-size); min-height: var(--handle-size); border-width: var(--handle-stroke); }
@@ -135,6 +150,8 @@
 @keyframes string-transfer { to { stroke-dashoffset: -60; } }
 @media (prefers-reduced-motion: reduce) {
   .flow-string-pulse { animation: none; stroke-dasharray: none; }
+  .canvas-match-focused .inspection-node { animation: none; }
+  .canvas-node-focused, .canvas-node-dimmed { transition: none; }
 }
 
 :root {
@@ -170,17 +187,27 @@
   --destructive-soft-hover: color-mix(in oklab, var(--destructive) 24%, var(--secondary));
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
-  --node-width: 280px;
-  --matching-node-width: 340px;
-  --node-text-size: 20px;
-  --node-heading-size: 20px;
+  --node-width: 240px;
+  --matching-node-width: 336px;
+  --node-text-size: 18px;
+  --node-heading-size: 18px;
+  --node-caption-size: 16px;
+  --node-caption-gap: 4px;
+  --node-padding: 16px;
+  --node-gap: 12px;
+  --canvas-dimmed-opacity: 0.4;
+  --canvas-edge-opacity: 0.4;
+  --matching-glow: 0 0 18px color-mix(in oklab, var(--warning) 18%, transparent);
+  --matching-pulse: 0 0 28px color-mix(in oklab, var(--warning) 38%, transparent);
+  --run-header-height: 76px;
+  --run-toast-bottom: 88px;
   --node-line-height: 1.35;
-  --node-heading-height: 56px;
+  --node-heading-height: 24px;
   --node-actions-height: 44px;
   --confidence-size: 64px;
   --confidence-meter-height: 6px;
-  --edge-label-size: 18px;
-  --edge-label-width: 110px;
+  --edge-label-size: 14px;
+  --edge-label-width: 100px;
   --edge-label-vertical-width: 240px;
   --edge-label-padding: 4px 8px;
   --handle-size: 7px;
