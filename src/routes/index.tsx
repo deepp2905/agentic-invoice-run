@@ -35,6 +35,7 @@ function RunsPage() {
               {["Run", "Vendor", "Amount", "Status", "Date"].map((h) => (
                 <th key={h} className="px-6 py-4 font-medium">{h}</th>
               ))}
+              <th className="px-6 py-4"><span className="sr-only">Action</span></th>
             </tr>
           </thead>
           <tbody>
@@ -45,6 +46,13 @@ function RunsPage() {
                 <td className="px-6 py-4">{r.amount}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
+                <td className="px-6 py-4 text-right">
+                  <Button asChild size="sm" variant={r.id === alert.runId ? "destructive" : r.id === "INV-4821" ? "warning" : "secondary"}>
+                    <Link to="/runs/$runId" params={{ runId: r.id === "INV-4821" ? alert.runId : r.id }}>
+                      {r.id === alert.runId ? "Fix" : r.id === "INV-4821" ? "Investigate" : "View run"}
+                    </Link>
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
