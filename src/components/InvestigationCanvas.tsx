@@ -11,7 +11,7 @@ import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 import { canvasLayout, easeInOut, elbowHandoff } from "@/lib/canvas-layout";
 
-type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; count: number; incoming?: ConnectionSide; outgoing?: ConnectionSide; onInspect: (agent: Agent) => void };
+type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; count: number; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
 const icons = { pending: CircleDashed, running: LoaderCircle, success: Check, warning: AlertTriangle, failed: X, skipped: SkipForward };
 const labels = { pending: "Waiting", running: "Running…", success: "Successful", warning: "Warning", failed: "Held for review", skipped: "Not paid" };
@@ -145,7 +145,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   if (connections[2]) { connections[2].source = "bottom"; connections[2].target = "top"; }
   const visibleNodes = nodes.map((node, i) => {
     const outcome = nodeOutcome(i - 1, replay);
-    const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? "Processing INV-4821-A" : i === 1 ? "INV-4821-A · $12,480" : i === 3 ? outcome === "failed" ? "Held for review" : "Exact-number check passed" : i === 4 ? outcome === "skipped" ? "Not paid" : "Paid $12,480" : "";
+    const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? "Processing INV-4821-A" : i === 1 ? "INV-4821-A · $12,480" : i === 3 ? outcome === "failed" ? "Held for review" : "Duplicate check passed" : i === 4 ? outcome === "skipped" ? "Not paid" : "Paid $12,480" : "";
     return { ...node, className: focus === node.id ? `canvas-node-focused ${node.id === "matching" ? "canvas-match-focused" : ""}` : focus ? "canvas-node-dimmed" : "", data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: hasNewReceipt(replay), count } };
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => {
