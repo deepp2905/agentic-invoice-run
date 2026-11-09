@@ -3,7 +3,7 @@ export const canvasLayout = {
   minimumZoom: 0.7,
   padding: 48,
   focusZoom: 1,
-  previewDuration: 400,
+  previewDuration: 0,
   cameraDuration: 800,
   countDuration: 600,
   dimmedOpacity: 0.4,
