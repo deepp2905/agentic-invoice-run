@@ -15,6 +15,7 @@ type FlowNode = Node<FlowData, "inspection">;
 const icons = { pending: CircleDashed, running: LoaderCircle, success: Check, warning: AlertTriangle, failed: X, skipped: SkipForward };
 const labels = { pending: "Waiting", running: "Running…", success: "Successful", warning: "Warning", failed: "Held for review", skipped: "Skipped · Not paid" };
 
+const LOW_CONFIDENCE = 80;
 const sidePositions = { left: Position.Left, right: Position.Right, top: Position.Top, bottom: Position.Bottom };
 const titles: Record<string, string> = { extraction: "Read invoice", matching: "Match purchase order", policy: "Check duplicates", payment: "Issue payment" };
 const stationIcons: Record<string, typeof FileScan> = { extraction: FileScan, matching: GitCompareArrows, policy: ShieldCheck, payment: Receipt };
@@ -24,7 +25,8 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
   const StationIcon = data.agent ? stationIcons[data.agent.id] ?? FileScan : data.kind === "queue" ? Files : Receipt;
   const updateNodeInternals = useUpdateNodeInternals();
   useEffect(() => { updateNodeInternals(id); }, [id, data.incoming, data.outgoing, updateNodeInternals]);
-  return <div className={`inspection-node outcome-${data.outcome}`}>
+  const review = data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : null;
+  return <div className={`inspection-node outcome-${data.outcome} ${data.agent ? "inspection-node-clickable" : ""}`} title={undefined}>
     {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
     <div className="flex h-11 items-center justify-between gap-2 px-3">
       <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold"><GripVertical className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" /><StationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
@@ -36,11 +38,11 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
           <p className="mb-1 text-2xs text-muted-foreground">{data.agent.name}</p>
           <p className="min-h-8 text-caption leading-relaxed">{data.detail}</p>
         </InsetRow>
-        <InsetRow className="flex items-center justify-between py-1.5 text-2xs"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></InsetRow>
-        <div className="flex h-9 items-center justify-between gap-2 px-1">
-          {data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
-           <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : data.outcome === "failed" ? "border-destructive/30 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}</Button>
-        </div>
+        {data.agent.confidence < LOW_CONFIDENCE && <InsetRow className="flex items-center justify-between py-1.5 text-2xs text-warning"><span>Low confidence</span><span className="font-mono">{data.agent.confidence}%</span></InsetRow>}
+        {(review || (data.outcome !== "success" && data.outcome !== "warning")) && <div className="flex h-9 items-center justify-between gap-2 px-1">
+          {data.outcome !== "warning" && data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
+          {review && <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : "border-destructive/30 text-destructive"}`} aria-label={`${data.agent.name}: ${review}`} onClick={(e) => { e.stopPropagation(); if (data.agent) data.onInspect(data.agent); }}>{review}</Button>}
+        </div>}
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">
       {data.kind === "queue" ? queuedInvoices.map(invoice => <InsetRow key={invoice.id} className={invoice.legit ? "text-success" : data.paused ? "text-warning" : "text-foreground"}>
@@ -115,7 +117,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   });
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state: visibleNodes[i]?.data.outcome } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
-    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStop={(_, dragged) => setNodes(current => {
+    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeClick={(_, node) => { if (node.data.agent) onInspect(node.data.agent); }} onNodeDragStop={(_, dragged) => setNodes(current => {
         const size = (n: FlowNode) => ({ width: n.measured?.width ?? 230, height: n.measured?.height ?? 250 });
         const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
         const position = resolveOverlap({ ...dragged.position, ...size(dragged) }, others);

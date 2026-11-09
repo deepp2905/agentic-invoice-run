@@ -88,6 +88,8 @@
   color: var(--foreground);
   cursor: grab;
 }
+.inspection-node-clickable { cursor: pointer; transition: background-color 150ms; }
+.inspection-node-clickable:hover { background: var(--secondary); }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
 .inspection-node .react-flow__handle { width: var(--handle-size); height: var(--handle-size); min-width: var(--handle-size); min-height: var(--handle-size); border-width: var(--handle-stroke); }
 .inspection-node .connection-target { opacity: 0; pointer-events: none; }
