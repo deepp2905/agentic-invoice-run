@@ -1,6 +1,6 @@
 # Prototype additions
 - [x] Green successful-match percentages and single-line titles on widened canvas cards; verify all runs
-- [ ] Smooth the cross-row Matching-to-Policy connector while preserving its routing and arrow direction
+- [x] Smooth the cross-row Matching-to-Policy connector while preserving its routing and arrow direction
 - [x] Give every listed run its own mock agents, evidence, receipts and replay outcome; verify navigation and duplicate regressions
 - [x] Correct saved-rule replay and toast sequencing; pause only duplicates; separate controls and clear edge labels; verify Undo and replay
 - [x] Left-to-right rows, elbow handoff, compact nodes/header, interruptible focus, centered toasts, instant pause, and regression verification
