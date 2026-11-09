@@ -88,7 +88,7 @@ function CanvasControls({ onFull, onReset, onInterrupt }: { onFull: () => void; 
   const { zoomIn, zoomOut } = useReactFlow();
   const { zoom } = useViewport();
   return <div className="canvas-control-band flex shrink-0 items-center border-t border-border bg-background px-3 py-2"><div className="canvas-controls flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-1">
-    <Button variant="ghost" onClick={onFull}>Show full flow</Button>
+    <Button variant="ghost" onClick={onFull}>Fit to view</Button>
     <IconButton label="Zoom out" icon={Minus} onClick={() => { onInterrupt(); zoomOut(); }} />
     <span className="w-12 text-center font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
     <IconButton label="Zoom in" icon={Plus} onClick={() => { onInterrupt(); zoomIn(); }} />
