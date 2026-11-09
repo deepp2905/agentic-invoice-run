@@ -33,3 +33,4 @@ use the editor.
 - Keep cross-page prototype actions in a root-mounted React context with a pure reducer so navigation preserves state and undo/replay remain testable without persistence.
 - Use React Flow for the investigation canvas and a pure replay state machine for node outcomes and connector handoffs; keep viewport movement separate from fixed page controls.
 - Jointly derive distinct incoming/outgoing edge centers from neighboring node bounds through a pure geometry helper; keep stable handle IDs so dragging preserves coherent ordered flow without overlapping ports.
+- Render arrow markers inside each custom edge with automatic SVG orientation so arrowheads follow the actual curve tangent and share its outcome styling.

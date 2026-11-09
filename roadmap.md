@@ -1,5 +1,5 @@
 # Prototype additions
-- [ ] Green successful-node borders and incoming strings, icon-free details buttons, and curve-aligned arrowheads; verify canvas
+- [x] Green successful-node borders and incoming strings, icon-free details buttons, and curve-aligned arrowheads; verify canvas
 - [x] Joint incoming/outgoing routing with distinct edge centers; test and verify drag conflicts
 - [x] Match reference workflow-card visual feel in dark mode and verify existing interactions
 - [x] Simplified contextual cards, outcome toasts, and single-row initial flow
