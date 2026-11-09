@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { initialPrototypeState, prototypeReducer, queuedInvoices, replayOutcome } from "@/lib/prototype-state";
+import { initialPrototypeState, prototypeReducer, queuedInvoices, queuedInvoiceState, replayOutcome } from "@/lib/prototype-state";
 
 describe("Finance prototype actions", () => {
-  it("pauses exactly 3 queued invoices and logs the action", () => {
+  it("pauses only INV-4821-B and INV-4821-C while D remains safe", () => {
     expect(queuedInvoices).toHaveLength(3);
     const state = prototypeReducer(initialPrototypeState, { type: "pause", time: "09:14" });
     expect(state.paused).toBe(true);
+    expect(queuedInvoices.filter(invoice => queuedInvoiceState(invoice, state.paused) === "paused").map(invoice => invoice.id)).toEqual(["INV-4821-B", "INV-4821-C"]);
+    expect(queuedInvoices.filter(invoice => queuedInvoiceState(invoice, state.paused) === "safe").map(invoice => invoice.id)).toEqual(["INV-4821-D"]);
     expect(state.log[0]).toMatchObject({ kind: "pause", time: "09:14" });
   });
   it("undo resumes paused invoices", () => {
@@ -22,6 +24,11 @@ describe("Finance prototype actions", () => {
   it("undo restores the prior duplicate rule", () => {
     const changed = prototypeReducer(initialPrototypeState, { type: "rule", rule: "combined", time: "09:14" });
     expect(prototypeReducer(changed, { type: "undo", id: 1, time: "09:15" }).rule).toBe("exact");
+  });
+  it("allows the saved combined rule to be restored only by Activity undo", () => {
+    const saved = prototypeReducer(initialPrototypeState, { type: "rule", rule: "combined", time: "09:14" });
+    expect(prototypeReducer(saved, { type: "rule", rule: "exact", time: "09:15" }).rule).toBe("combined");
+    expect(prototypeReducer(saved, { type: "undo", id: 1, time: "09:16" }).rule).toBe("exact");
   });
   it("the unchanged exact-number rule replays as paid", () => {
     expect(replayOutcome("exact")).toEqual({ caught: false, payment: "paid" });

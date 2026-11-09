@@ -1,4 +1,4 @@
-import type { DuplicateRule } from "@/lib/prototype-state";
+import type { DuplicateRule, PrototypeState } from "@/lib/prototype-state";
 
 export type NodeOutcome = "pending" | "running" | "success" | "warning" | "failed" | "skipped";
 export interface ReplayFlow {
@@ -8,6 +8,20 @@ export interface ReplayFlow {
 }
 export function startReplay(rule: DuplicateRule): ReplayFlow {
   return { rule, index: 0, phase: "running" };
+}
+export function startSavedReplay(state: Pick<PrototypeState, "rule">): ReplayFlow {
+  return startReplay(state.rule);
+}
+
+export function savedRuleView(replay: ReplayFlow | null, rule: DuplicateRule): ReplayFlow | null {
+  if (replay?.rule === rule) return replay;
+  return rule === "combined" ? { rule, index: 2, phase: "complete" } : null;
+}
+
+export function completionAgents(replay: ReplayFlow): number[] {
+  if (replay.phase !== "running") return [];
+  if (replay.index === 2) return [];
+  return replay.index === 3 ? [2, 3] : [replay.index];
 }
 export function advanceReplay(replay: ReplayFlow): ReplayFlow {
   if (replay.phase === "complete") return replay;

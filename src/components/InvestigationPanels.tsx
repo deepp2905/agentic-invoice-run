@@ -4,7 +4,8 @@ import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { queuedInvoices, type DuplicateRule } from "@/lib/prototype-state";
+import { queuedInvoices, queuedInvoiceState, type DuplicateRule } from "@/lib/prototype-state";
+import { toast } from "sonner";
 import type { Agent } from "@/lib/mock-data";
 
 export type InvestigationPanel = Agent | "pause" | "rule" | null;
@@ -16,7 +17,7 @@ export function InvestigationPanels({ panel, onClose }: { panel: InvestigationPa
   return <Sheet open={panel !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
     <SheetContent className="w-full overflow-y-auto bg-card p-8 sm:max-w-md">
       <SheetTitle>{agent?.name ?? (panel === "pause" ? "Similar queued invoices" : "Edit duplicate rule")}</SheetTitle>
-      <SheetDescription className="mt-2">{agent?.summary ?? (panel === "pause" ? `Harbor Office Supply · PO-7710 · ${state.paused ? "Paused" : "3 queued"}` : "Duplicate invoice check")}</SheetDescription>
+      <SheetDescription className="mt-2">{agent?.summary ?? (panel === "pause" ? `Harbor Office Supply · ${state.paused ? "2 paused, 1 safe to release" : "2 queued, 1 safe to release"}` : "Duplicate invoice check")}</SheetDescription>
       {agent && <>
         {agent.id === "matching" && <section className="mt-7">
           <h3 className="font-medium">Why did it do that?</h3>
@@ -45,13 +46,17 @@ export function InvestigationPanels({ panel, onClose }: { panel: InvestigationPa
         <dl className="mt-4 divide-y divide-border rounded-md border border-border">{agent.evidence.map((e) => <div key={e.label} className="px-4 py-3"><dt className="text-xs text-muted-foreground">{e.label}</dt><dd className="mt-1 text-sm">{e.value}</dd></div>)}</dl>
       </>}
       {panel === "pause" && <>
-        <ul className="mt-6 divide-y divide-border border-y border-border">{queuedInvoices.map((invoice) => <li key={invoice.id} className="py-4 text-sm"><div className="flex items-center justify-between gap-3"><span className="font-mono">{invoice.id}</span><span className={toneText[invoice.legit ? "success" : state.paused ? "warning" : "neutral"]}>{invoice.legit ? "Not a duplicate" : state.paused ? "Paused" : "Queued"}</span></div><p className="mt-2 text-muted-foreground">{invoice.vendor}</p><p className="mt-1 text-muted-foreground">{invoice.amount} · {invoice.po}</p>{invoice.legit && <Chip tone="success" className="mt-2">Not a duplicate, safe to release</Chip>}</li>)}</ul>
-        <Button className="mt-6 w-full" disabled={state.paused} onClick={() => dispatch({ type: "pause", time: actionTime() })}>{state.paused ? "3 runs paused" : "Confirm pause"}</Button>
+        <ul className="mt-6 divide-y divide-border border-y border-border">{queuedInvoices.map((invoice) => {
+          const status = queuedInvoiceState(invoice, state.paused);
+          return <li key={invoice.id} className="py-4 text-sm"><div className="flex items-center justify-between gap-3"><span className="font-mono">{invoice.id}</span><span className={toneText[status === "safe" ? "success" : status === "paused" ? "warning" : "neutral"]}>{status === "safe" ? "Safe to release" : status === "paused" ? "Paused" : "Queued"}</span></div><p className="mt-2 text-muted-foreground">{invoice.vendor}</p><p className="mt-1 text-muted-foreground">{invoice.amount} · {invoice.po}</p>{invoice.legit && <Chip tone="success" className="mt-2">Not a duplicate, safe to release</Chip>}</li>;
+        })}</ul>
+        <Button className="mt-6 w-full" disabled={state.paused} onClick={() => { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 2500 }); }}>{state.paused ? "2 runs paused" : "Confirm pause"}</Button>
       </>}
       {panel === "rule" && <>
         <fieldset className="mt-8 space-y-4"><legend className="mb-4 text-sm font-medium">Match duplicates by</legend>
-          {([{ value: "exact", label: "Exact invoice number" }, { value: "combined", label: "Vendor + amount + PO" }] as const).map((option) => <label key={option.value} className="flex cursor-pointer items-center gap-3 rounded-md border border-border p-4 text-sm"><input type="radio" name="duplicate-rule" value={option.value} checked={draft === option.value} onChange={() => setDraft(option.value)} className="accent-primary" />{option.label}</label>)}
+          {([{ value: "exact", label: "Exact invoice number" }, { value: "combined", label: "Vendor + amount + PO" }] as const).map((option) => <label key={option.value} className="flex cursor-pointer items-center gap-3 rounded-md border border-border p-4 text-sm"><input type="radio" name="duplicate-rule" value={option.value} disabled={state.rule === "combined" && option.value === "exact"} checked={draft === option.value} onChange={() => setDraft(option.value)} className="accent-primary" />{option.label}</label>)}
         </fieldset>
+        {state.rule === "combined" && <p className="mt-3 text-sm text-muted-foreground">Restore the previous rule with Undo in Activity.</p>}
         <Notice role="status" tone={draft === "combined" ? "success" : "warning"} className="mt-4">
           {draft === "combined" ? "Tested on the last 30 days: would hold 2 duplicates, would not hold 1 legitimate invoice, 0 false flags." : "Would hold 0 of the 2 duplicates."}
         </Notice>

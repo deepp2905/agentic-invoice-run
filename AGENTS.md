@@ -31,9 +31,12 @@ use the editor.
 
 ## Prototype architecture
 - Keep cross-page prototype actions in a root-mounted React context with a pure reducer so navigation preserves state and undo/replay remain testable without persistence.
+- Keep prototype context identity in a separate browser-safe module cached in Vite hot data, so live-updated consumers remain attached to the mounted root provider.
 - Use React Flow for the investigation canvas and a pure replay state machine for node outcomes and connector handoffs; keep viewport movement separate from fixed page controls.
 - Use two left-to-right rows and a bottom-to-top elbow for the cross-row handoff; keep layout and timing constants in a tested browser-safe module.
 - Animate the React Flow viewport transform through cancellable frame interpolation; user gestures cancel camera ownership, and reduced motion skips movement.
+- Read the synchronous root action-state accessor for each replay; derive idle results from the saved rule so route remounts cannot show a stale payment result.
+- Reserve a separate bottom control band outside the React Flow viewport, and resolve edge-label clearance against measured node bounds in screen pixels.
 - Jointly derive distinct incoming/outgoing edge centers from neighboring node bounds through a pure geometry helper; keep stable handle IDs so dragging preserves coherent ordered flow without overlapping ports.
 - Render arrow markers inside each custom edge with automatic SVG orientation so arrowheads follow the actual curve tangent and share its outcome styling.
 - Shared UI atoms (Chip, Notice, InsetRow, Surface, IconButton, Avatar, Hint) live in src/components/system; pages compose them and never hardcode colors, radii or font sizes — tokens in src/styles.css are the single source.
