@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesState, useReactFlow, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesState, useReactFlow, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
 import { Check, CircleDashed, Grip, LoaderCircle, Maximize, Minus, Plus, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
 import { nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
 
-type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; onInspect: (agent: Agent) => void };
+type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
 const icons = { pending: CircleDashed, running: LoaderCircle, success: Check, warning: AlertTriangle, failed: X, skipped: SkipForward };
 const labels = { pending: "Waiting", running: "Running…", success: "Successful", warning: "Warning", failed: "Held for review", skipped: "Skipped · Not paid" };
@@ -45,7 +45,7 @@ function InspectionNode({ data }: NodeProps<FlowNode>) {
 
 function StringEdge(props: EdgeProps) {
   const [path] = getBezierPath({ ...props, curvature: 0.55 });
-  const active = props.data?.active === true;
+  const active = props.data?.['active'] === true;
   return <g className={`flow-string ${active ? "flow-string-active" : ""}`}>
     <BaseEdge id={props.id} path={path} />
     {active && <path d={path} className="flow-string-pulse" />}
@@ -57,22 +57,15 @@ const positions = [{ x: 0, y: 150 }, { x: 310, y: 50 }, { x: 620, y: 150 }, { x:
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls() {
-  const { zoomIn, zoomOut, fitView, getZoom } = useReactFlow();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { zoom } = useViewport();
   return <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded border border-border bg-card p-1">
     <Button variant="ghost" size="icon" aria-label="Zoom out" title="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button>
     <Button variant="ghost" size="icon" aria-label="Fit flow" title="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button>
     <Button variant="ghost" size="icon" aria-label="Zoom in" title="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button>
-    <ZoomReadout getZoom={getZoom} />
+    <span className="w-12 text-center font-mono text-[10px] text-muted-foreground">{Math.round(zoom * 100)}%</span>
   </div>;
 }
-function ZoomReadout({ getZoom }: { getZoom: () => number }) {
-  // React Flow's viewport subscription keeps this label in sync with gestures.
-  const { viewport } = useViewportValue();
-  return <span className="w-12 text-center font-mono text-[10px] text-muted-foreground">{Math.round((viewport.zoom ?? getZoom()) * 100)}%</span>;
-}
-import { useViewport } from "@xyflow/react";
-function useViewportValue() { return { viewport: useViewport() }; }
-
 export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {
   return <ReactFlowProvider><Canvas {...props} /></ReactFlowProvider>;
 }
