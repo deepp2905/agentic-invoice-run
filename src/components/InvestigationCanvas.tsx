@@ -88,7 +88,7 @@ function StringEdge(props: EdgeProps) {
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
 const positions = [{ x: 0, y: 0 }, { x: 400, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 450 }, { x: 400, y: 450 }, { x: 0, y: 450 }];
-const fitOptions = { padding: 0.04, maxZoom: 1 };
+const fitOptions = { padding: { top: "12px", bottom: "64px", left: "12px", right: "12px" } as const, maxZoom: 1 };
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls({ onReset }: { onReset: () => void }) {
@@ -114,6 +114,11 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
     const frame = requestAnimationFrame(() => { fitView(fitOptions); fitted.current = true; });
     return () => cancelAnimationFrame(frame);
   }, [initialized, fitView]);
+  useEffect(() => {
+    if (!initialized || !replay) return;
+    const timer = setTimeout(() => fitView({ ...fitOptions, duration: 200 }), 100);
+    return () => clearTimeout(timer);
+  }, [initialized, replay?.phase, replay?.index, fitView]);
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
   const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? (node.id === "matching" ? 340 : 280), height: node.measured?.height ?? 250 }));
   const connections = flowConnections(bounds);
