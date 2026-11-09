@@ -1,6 +1,6 @@
 # Prototype additions
-- [ ] Keep arrow captions anchored near their connector, using compact tooltips when full captions cannot fit
-- [ ] Replace the brief-only README with project setup and architecture documentation
+- [x] Keep arrow captions anchored near their connector, using compact tooltips when full captions cannot fit
+- [x] Replace the brief-only README with project setup and architecture documentation
 - [ ] Push to main — blocked: sync branch and pushing are managed in Lovable’s Git settings
 - [x] Green successful-match percentages and single-line titles on widened canvas cards; verify all runs
 - [x] Smooth the cross-row Matching-to-Policy connector while preserving its routing and arrow direction
