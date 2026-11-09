@@ -107,6 +107,7 @@
 .confidence-meter-fill { width: 62%; height: 100%; background: var(--warning); }
 .outcome-skipped { background: var(--muted-surface); border-color: var(--border); color: var(--muted-foreground); }
 .flow-edge-label { position: absolute; max-width: var(--edge-label-width); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
+.flow-edge-label-vertical { max-width: var(--edge-label-vertical-width); }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
 .inspection-node .react-flow__handle { width: var(--handle-size); height: var(--handle-size); min-width: var(--handle-size); min-height: var(--handle-size); border-width: var(--handle-stroke); }
 .inspection-node .connection-target { opacity: 0; pointer-events: none; }
@@ -179,7 +180,8 @@
   --confidence-size: 64px;
   --confidence-meter-height: 6px;
   --edge-label-size: 18px;
-  --edge-label-width: 180px;
+  --edge-label-width: 110px;
+  --edge-label-vertical-width: 240px;
   --edge-label-padding: 4px 8px;
   --handle-size: 7px;
   --handle-stroke: 2px;

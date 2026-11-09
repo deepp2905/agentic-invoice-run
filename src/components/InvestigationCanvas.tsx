@@ -83,11 +83,11 @@ function StringEdge(props: EdgeProps) {
     <defs><marker id={markerId} viewBox="0 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0,-5 L 10,0 L 0,5 Z" className="flow-string-arrow" /></marker></defs>
     <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
-  </g>{typeof label === "string" && <EdgeLabelRenderer><div className={`flow-edge-label nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }}>{label}</div></EdgeLabelRenderer>}</>;
+  </g>{typeof label === "string" && <EdgeLabelRenderer><div className={`flow-edge-label ${props.sourcePosition === Position.Bottom || props.sourcePosition === Position.Top ? "flow-edge-label-vertical" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }}>{label}</div></EdgeLabelRenderer>}</>;
 }
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
-const positions = [{ x: 0, y: 0 }, { x: 400, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 390 }, { x: 400, y: 390 }, { x: 0, y: 390 }];
+const positions = [{ x: 0, y: 0 }, { x: 400, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 450 }, { x: 400, y: 450 }, { x: 0, y: 450 }];
 const fitOptions = { padding: 0.04, maxZoom: 1 };
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
