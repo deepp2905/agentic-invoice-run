@@ -41,7 +41,7 @@ function RunsPage() {
           <tbody>
             {runs.map((r) => (
               <tr key={r.id} className="border-t border-border">
-                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <Chip tone="warning" className="mt-2 flex">Possible duplicate</Chip>}</td>
+                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}</td>
                 <td className="px-6 py-4">{r.vendor}</td>
                 <td className="px-6 py-4">{r.amount}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
