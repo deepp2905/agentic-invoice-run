@@ -32,21 +32,21 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
     {data.agent ? <>
       <div className="flex flex-col gap-1.5 px-2 pb-2">
         <div className="rounded-md bg-muted/50 px-2.5 py-2">
-          <p className="mb-1 text-[10px] text-muted-foreground">{data.agent.name}</p>
-          <p className="min-h-8 text-[11px] leading-relaxed">{data.detail}</p>
+          <p className="mb-1 text-2xs text-muted-foreground">{data.agent.name}</p>
+          <p className="min-h-8 text-caption leading-relaxed">{data.detail}</p>
         </div>
-        <div className="flex h-7 items-center justify-between rounded-md bg-muted/50 px-2.5 text-[10px]"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></div>
+        <div className="flex h-7 items-center justify-between rounded-md bg-muted/50 px-2.5 text-2xs"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></div>
         <div className="flex h-9 items-center justify-between gap-2 px-1">
-          {data.outcome !== "success" ? <span className="node-status text-[10px]" role="status">{labels[data.outcome]}</span> : <span />}
-           <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-[10px] shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : data.outcome === "failed" ? "border-destructive/30 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}</Button>
+          {data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
+           <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning" : data.outcome === "failed" ? "border-destructive/30 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}</Button>
         </div>
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">
-      {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`rounded-md bg-muted/50 px-2.5 py-2 ${invoice.legit ? "text-primary" : data.paused ? "text-warning" : "text-foreground"}`}>
-        <p className="font-mono text-[11px]">{invoice.id}</p><p className="mt-1 text-[10px] text-muted-foreground">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
+      {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`rounded-md bg-muted/50 px-2.5 py-2 ${invoice.legit ? "text-success" : data.paused ? "text-warning" : "text-foreground"}`}>
+        <p className="font-mono text-caption">{invoice.id}</p><p className="mt-1 text-2xs text-muted-foreground">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
       </div>) : <>
-        <div className="rounded-md bg-muted/50 px-2.5 py-2"><p className="font-mono text-[11px]">INV-4821</p><p className="mt-1 text-[10px] text-muted-foreground">Paid Oct 29 · $12,480</p></div>
-        {data.paidAgain && <div className="rounded-md bg-destructive/10 px-2.5 py-2 text-destructive"><p className="font-mono text-[11px]">INV-4821-A</p><p className="mt-1 text-[10px]">Paid again · $12,480</p></div>}
+        <div className="rounded-md bg-muted/50 px-2.5 py-2"><p className="font-mono text-caption">INV-4821</p><p className="mt-1 text-2xs text-muted-foreground">Paid Oct 29 · $12,480</p></div>
+        {data.paidAgain && <div className="rounded-md bg-destructive/10 px-2.5 py-2 text-destructive"><p className="font-mono text-caption">INV-4821-A</p><p className="mt-1 text-2xs">Paid again · $12,480</p></div>}
       </>}
     </div>}
     {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
@@ -85,7 +85,7 @@ function CanvasControls({ onReset }: { onReset: () => void }) {
   const { zoom } = useViewport();
   return <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded border border-border bg-card p-1">
     <Hint label="Zoom out"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button></Hint>
-    <span className="w-12 text-center font-mono text-[10px] text-muted-foreground">{Math.round(zoom * 100)}%</span>
+    <span className="w-12 text-center font-mono text-2xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
     <Hint label="Zoom in"><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button></Hint>
     <Hint label="Fit flow"><Button variant="ghost" size="icon" aria-label="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button></Hint>
     <Hint label="Reset layout"><Button variant="ghost" size="icon" aria-label="Reset layout" onClick={onReset}><RotateCcw /></Button></Hint>

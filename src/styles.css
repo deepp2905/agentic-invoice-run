@@ -27,6 +27,10 @@
   --radius-2xl: calc(var(--radius) * 2);
   --radius-3xl: calc(var(--radius) * 2.5);
   --radius-4xl: calc(var(--radius) * 3);
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1.1rem;
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Oswald", "Archivo", ui-sans-serif, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -47,6 +51,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-warning: var(--warning);
+  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -70,13 +75,13 @@
   --xy-background-color: var(--background);
   --xy-background-pattern-dots-color: var(--canvas-dot);
   --xy-edge-stroke: var(--canvas-wire);
-  --xy-edge-stroke-width: 2.5;
+  --xy-edge-stroke-width: var(--edge-width);
   --xy-handle-background-color: var(--card);
   --xy-handle-border-color: var(--canvas-wire);
   --xy-attribution-background-color: var(--background);
 }
 .inspection-node {
-  width: 230px;
+  width: var(--node-width);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   background: var(--card);
@@ -84,27 +89,27 @@
   cursor: grab;
 }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
-.inspection-node .react-flow__handle { width: 7px; height: 7px; min-width: 7px; min-height: 7px; border-width: 2px; }
+.inspection-node .react-flow__handle { width: var(--handle-size); height: var(--handle-size); min-width: var(--handle-size); min-height: var(--handle-size); border-width: var(--handle-stroke); }
 .inspection-node .connection-target { opacity: 0; pointer-events: none; }
 .investigation-canvas .react-flow__arrowhead { fill: var(--canvas-wire); stroke: var(--canvas-wire); }
-.toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--primary); }
+.toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--success); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--warning); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--destructive); }
-.outcome-running, .outcome-success { border-color: var(--primary); }
-.outcome-running .node-status, .outcome-success .node-status { color: var(--primary); }
+.outcome-running, .outcome-success { border-color: var(--success); }
+.outcome-running .node-status, .outcome-success .node-status { color: var(--success); }
 .outcome-warning { border-color: var(--warning); }
 .outcome-warning .node-status { color: var(--warning); }
 .outcome-failed { border-color: var(--destructive); }
 .outcome-failed .node-status { color: var(--destructive); }
 .outcome-pending .node-status, .outcome-skipped .node-status { color: var(--muted-foreground); }
 .flow-string-arrow { fill: var(--canvas-wire); }
-.flow-string-active .react-flow__edge-path, .flow-string-success .react-flow__edge-path { stroke: var(--primary); }
-.flow-string-active .flow-string-arrow, .flow-string-success .flow-string-arrow { fill: var(--primary); }
+.flow-string-active .react-flow__edge-path, .flow-string-success .react-flow__edge-path { stroke: var(--success); }
+.flow-string-active .flow-string-arrow, .flow-string-success .flow-string-arrow { fill: var(--success); }
 .flow-string-warning .react-flow__edge-path { stroke: var(--warning); }
 .flow-string-warning .flow-string-arrow { fill: var(--warning); }
 .flow-string-failed .react-flow__edge-path { stroke: var(--destructive); }
 .flow-string-failed .flow-string-arrow { fill: var(--destructive); }
-.flow-string-pulse { fill: none; stroke: var(--primary); stroke-width: 4; stroke-dasharray: 12 18; animation: string-transfer 550ms linear infinite; pointer-events: none; }
+.flow-string-pulse { fill: none; stroke: var(--success); stroke-width: var(--edge-pulse-width); stroke-dasharray: 12 18; animation: string-transfer 550ms linear infinite; pointer-events: none; }
 @keyframes string-transfer { to { stroke-dashoffset: -60; } }
 @media (prefers-reduced-motion: reduce) {
   .flow-string-pulse { animation: none; stroke-dasharray: none; }
@@ -131,6 +136,13 @@
   --destructive: oklch(0.63 0.22 27);
   --destructive-foreground: oklch(0.165 0.005 260);
   --warning: oklch(0.83 0.16 90);
+  --success: oklch(0.79 0.17 160);
+  /* Canvas geometry */
+  --node-width: 230px;
+  --handle-size: 7px;
+  --handle-stroke: 2px;
+  --edge-width: 2.5;
+  --edge-pulse-width: 4;
   --border: oklch(0.27 0.01 260);
   --canvas-dot: oklch(0.26 0.006 260);
   --canvas-wire: oklch(0.72 0.008 260);

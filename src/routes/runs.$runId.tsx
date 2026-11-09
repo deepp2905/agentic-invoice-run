@@ -58,7 +58,7 @@ function RunView() {
         <div><h1 className="font-serif text-3xl font-semibold uppercase sm:text-4xl">$12,480 paid twice</h1><p className="mt-2 text-xs text-muted-foreground"><span className="font-mono">{runId}</span> · Nov 7, 09:14 · Harbor Office Supply</p></div>
         <Button variant="outline" className="shadow-none" disabled={running} onClick={() => { setSelected(null); setReplay(startReplay(state.rule)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
       </div>
-      {replay?.phase === "complete" && <div role="status" className={`mt-3 text-sm font-semibold ${caught ? "text-primary" : "text-destructive"}`}>{caught ? "Duplicate caught · Held at Policy · Payment skipped" : "Paid again · Duplicate was not caught"}</div>}
+      {replay?.phase === "complete" && <div role="status" className={`mt-3 text-sm font-semibold ${caught ? "text-success" : "text-destructive"}`}>{caught ? "Duplicate caught · Held at Policy · Payment skipped" : "Paid again · Duplicate was not caught"}</div>}
     </header>
     <InvestigationCanvas replay={replay} paused={state.paused} onInspect={setSelected} />
     <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">

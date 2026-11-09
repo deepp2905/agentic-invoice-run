@@ -7,7 +7,7 @@ export function Hint({ label, side = "top", children }: { label?: string | undef
   return <TooltipProvider delayDuration={250}>
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side={side} className="rounded-md border border-border bg-popover px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-popover-foreground shadow-none">{label}</TooltipContent>
+      <TooltipContent side={side} className="rounded-md border border-border bg-popover px-2 py-1 font-mono text-2xs uppercase tracking-wider text-popover-foreground shadow-none">{label}</TooltipContent>
     </Tooltip>
   </TooltipProvider>;
 }
