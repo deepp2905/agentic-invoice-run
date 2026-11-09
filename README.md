@@ -1,44 +1,61 @@
-# Invoice Run Insight
+# Ledger Watch — Invoice Run Insight
 
-Build a clickable prototype of an agent observability tool for a finance team. Dark mode desktop web app, clean and serious, one accent color (teal), high contrast text, generous spacing. Use hardcoded mock data in a local file. No backend.
+A frontend-only prototype for finance teams investigating AI-agent invoice payments. Explore individual invoice runs, inspect agent evidence, fix a duplicate rule, and replay the workflow without making real payments.
 
-Context: AI agents process vendor invoices. A duplicate payment just happened and the finance lead must investigate.
+## Features
 
-Layout: left sidebar with Runs and Rules. Main area is the Run view.
+- Runs table with contextual investigation and viewing actions.
+- Draggable, pannable, zoomable React Flow canvas: invoice queue, Extraction, Matching, Policy, Payment, and receipts.
+- Run-specific mock purchase orders, agent steps, confidence, and payment evidence.
+- Duplicate investigation for `INV-4821-A`, including the original `INV-4821` payment.
+- Editable duplicate rule, simulated rule test, sequential replay, and payment hold.
+- Pause two similar queued invoices while keeping a legitimate invoice safe to release.
+- Shared session activity with undoable rule and pause changes.
+- Reduced-motion support and contextual connector-caption tooltips.
 
-Screen 1, Alert: A banner at the top of the Runs page: "Invoice INV-4821 was paid twice, $12,480. Vendor: Harbor Office Supply." Button: "Investigate".
+## Local development
 
-Screen 2, Run timeline: Clicking Investigate opens the run for INV-4821-A. Show a horizontal timeline of 4 agent cards in order: Extraction, Matching, Policy, Payment. Each card shows status, the documents it used, and a confidence percentage. Show Matching at 62% with a warning marker, and arrows for hand offs between cards. Clicking a card opens a side panel with that agent's steps and the evidence it used.
-
-Mock data:
-
-- Extraction read invoice number INV-4821-A, 96% confidence.
-
-- Matching matched it to PO-7710, confidence 62%, because the invoice number differs from an earlier one. It handed off without a flag.
-
-- Policy has a duplicate rule that only checks exact invoice numbers, so it passed. 90%.
-
-- Payment prepared the approval and paid. 88%.
-
-Keep it simple and polished. Do not add extra features.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/57444f79-9c56-42a7-a183-e1f87381cc7c).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Requires a current Node.js release and Bun.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
+bun run dev
 ```
+
+Use the localhost URL printed by Vite.
+
+```sh
+bun run test       # Regression tests
+bun run build     # Production build
+```
+
+## Stack
+
+React 19, TypeScript, TanStack Start and Router, Vite, Tailwind CSS v4, React Flow, Radix UI, Sonner, Tabler icons, and Vitest.
+
+## Code organization
+
+| Location | Responsibility |
+| --- | --- |
+| `src/routes/` | Runs, individual run views, Rules, and Activity |
+| `src/lib/mock-data.ts` | Original invoice alert, run list, rules, and duplicate-agent evidence |
+| `src/lib/mock-runs.ts` | Run-specific historical agents, purchase orders, and receipts |
+| `src/lib/prototype-state.ts` | Pure reducer for shared rule, pause, activity, and undo state |
+| `src/lib/replay-flow.ts` | Sequential simulated agent outcomes and payment holds |
+| `src/lib/canvas-layout.ts` | Canvas layout, camera timing, and cross-row curve |
+| `src/lib/edge-caption.ts` | Collision-aware captions anchored near connectors |
+| `src/components/InvestigationCanvas.tsx` | Nodes, edges, camera, and fixed canvas controls |
+| `src/components/InvestigationPanels.tsx` | Evidence, rule editing, and queued-invoice panels |
+| `src/components/system/` | Shared interface atoms |
+| `src/styles.css` | Theme and canvas design tokens |
+| `src/test/` | State, replay, routing, geometry, and provider tests |
+
+## Prototype boundaries
+
+All records and receipts are mock data. Completed-run replays verify simulated payment processing; they do not create additional payments. Only the duplicate scenario can end in “Paid again” or “Duplicate caught,” depending on the currently saved rule. State is held in the root React provider for the current session and resets on a full page reload. There is no database, authentication, payment integration, or backend service.
+
+## Lovable and GitHub
+
+[Open this project in Lovable](https://lovable.dev/projects/57444f79-9c56-42a7-a183-e1f87381cc7c).
+
+Lovable manages commits and two-way repository sync. Select the intended synced branch in **Project settings → Git**; changes reach `main` through sync when it is the selected branch. Changes from another branch must be merged into `main` on GitHub. Avoid rewriting synced branch history.

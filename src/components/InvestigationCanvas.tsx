@@ -10,7 +10,8 @@ import { Hint } from "@/components/Hint";
 import { Chip, IconButton } from "@/components/system";
 import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
-import { canvasLayout, clearLabelPosition, easeInOut, elbowHandoff, type CanvasBounds } from "@/lib/canvas-layout";
+import { canvasLayout, easeInOut, elbowHandoff, type CanvasBounds } from "@/lib/canvas-layout";
+import { placeEdgeCaption } from "@/lib/edge-caption";
 
 type FlowData = { run: RunDetail; kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; count: number; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
@@ -72,14 +73,14 @@ function StringEdge(props: EdgeProps) {
   const stateClass = state === "success" ? "flow-string-success" : state === "warning" ? "flow-string-warning" : state === "failed" ? "flow-string-failed" : "";
   const markerId = `curve-arrow-${props.id}`, label = props.data?.['label'];
   const labelX = elbow?.labelX ?? (sx + 3 * (sx + snx * reach) + 3 * (ex + tnx * reach) + ex) / 8;
-  const labelY = elbow ? elbow.labelY - labelSize.height : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8 + 12 / zoom;
+  const labelY = elbow ? (sy + ty) / 2 : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8;
   const nodeBounds = props.data?.['bounds'] as CanvasBounds[] | undefined;
-  const labelPosition = clearLabelPosition(labelX, labelY, labelSize.width, labelSize.height, nodeBounds ?? [], 8 / zoom);
+  const labelPosition = placeEdgeCaption({ x: labelX, y: labelY }, labelSize, nodeBounds ?? [], zoom);
   return <><g className={`flow-string ${active ? "flow-string-active" : ""} ${stateClass}`}>
     <defs><marker id={markerId} viewBox="0 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0,-5 L 10,0 L 0,5 Z" className="flow-string-arrow" /></marker></defs>
     <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
-  </g>{typeof label === "string" && <EdgeLabelRenderer><div ref={labelElement} className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ transform: `translate(-50%, 0) translate(${labelPosition.x}px, ${labelPosition.y}px)` }}>{label}</div></EdgeLabelRenderer>}</>;
+  </g>{typeof label === "string" && <EdgeLabelRenderer><div ref={labelElement} aria-hidden={!labelPosition || labelPosition.compact} className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ visibility: !labelPosition || labelPosition.compact ? "hidden" : "visible", transform: `translate(-50%, 0) translate(${labelPosition?.x ?? labelX}px, ${labelPosition?.y ?? labelY}px)` }}>{label}</div>{labelPosition?.compact && <div className="nodrag nopan pointer-events-auto absolute" style={{ transform: `translate(-50%, 0) translate(${labelPosition.x}px, ${labelPosition.y}px) scale(${1 / zoom})`, transformOrigin: "top center" }}><Hint label={label}><Button size="icon" variant="secondary" aria-label={label} className={`size-5 rounded-full ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-muted-foreground"}`}><span className="text-xs" aria-hidden="true">i</span></Button></Hint></div>}</EdgeLabelRenderer>}</>;
 }
 const nodeTypes = { inspection: InspectionNode }, edgeTypes = { string: StringEdge };
 const ids = ["queue", "extraction", "matching", "policy", "payment", "output"];
