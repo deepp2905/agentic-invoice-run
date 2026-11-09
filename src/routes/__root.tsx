@@ -51,7 +51,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Button onClick={() => { router.invalidate(); reset(); }}>Try again</Button>
-          <Button variant="outline" asChild><a href="/">Go home</a></Button>
+          <Button variant="secondary" asChild><a href="/">Go home</a></Button>
         </div>
       </div>
     </div>

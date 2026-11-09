@@ -56,14 +56,14 @@ function RunView() {
       <Link to="/" className="mb-3 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" />Runs</Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><h1 className="text-2xl font-semibold sm:text-3xl">$12,480 paid twice</h1><p className="mt-2 text-xs text-muted-foreground"><span className="font-mono">{runId}</span> · Nov 7, 09:14 · Harbor Office Supply</p></div>
-        <Button variant="outline" className="shadow-none" disabled={running} onClick={() => { setSelected(null); setReplay(startReplay(state.rule)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
+        <Button disabled={running} onClick={() => { setSelected(null); setReplay(startReplay(state.rule)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
       </div>
       {replay?.phase === "complete" && <div role="status" className={`mt-3 text-sm font-semibold ${caught ? "text-success" : "text-destructive"}`}>{caught ? "Duplicate caught · Held at Policy · Payment skipped" : "Paid again · Duplicate was not caught"}</div>}
     </header>
     <InvestigationCanvas replay={replay} paused={state.paused} onInspect={setSelected} />
     <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">
       <div className="flex items-center gap-4"><h2 className="text-lg font-semibold">Decide</h2><p className="text-xs text-muted-foreground">{state.paused ? "3 similar invoices are paused." : "3 similar invoices are queued."}</p></div>
-      <div className="flex flex-wrap gap-2"><Button variant="outline" className="shadow-none" disabled={running} onClick={() => setSelected("pause")}><Pause />{state.paused ? "View paused runs" : "Pause similar runs"}</Button><Button variant="outline" className="shadow-none" disabled={running} onClick={() => setSelected("rule")}><Pencil />Edit rule</Button></div>
+      <div className="flex flex-wrap gap-2"><Button variant="secondary" disabled={running} onClick={() => setSelected("pause")}><Pause />{state.paused ? "View paused runs" : "Pause similar runs"}</Button><Button variant="secondary" disabled={running} onClick={() => setSelected("rule")}><Pencil />Edit rule</Button></div>
     </footer>
     <InvestigationPanels panel={selected} onClose={() => setSelected(null)} />
   </AppShell>;

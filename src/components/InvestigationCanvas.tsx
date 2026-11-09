@@ -41,7 +41,7 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
         {data.agent.confidence < LOW_CONFIDENCE && <InsetRow className="flex items-center justify-between py-1.5 text-2xs text-warning"><span>Low confidence</span><span className="font-mono">{data.agent.confidence}%</span></InsetRow>}
         {(review || (data.outcome !== "success" && data.outcome !== "warning")) && <div className="flex h-9 items-center justify-between gap-2 px-1">
           {data.outcome !== "warning" && data.outcome !== "success" ? <span className="node-status text-2xs" role="status">{labels[data.outcome]}</span> : <span />}
-          {review && <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs shadow-none ${data.outcome === "warning" ? "border-warning/30 text-warning hover:bg-warning/10 hover:text-warning" : "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"}`} aria-label={`${data.agent.name}: ${review}`} onClick={(e) => { e.stopPropagation(); if (data.agent) data.onInspect(data.agent); }}>{review}</Button>}
+          {review && <Button variant={data.outcome === "warning" ? "warning" : "destructive"} size="sm" className="nodrag nopan h-7 w-fit rounded-full px-2.5 text-2xs" aria-label={`${data.agent.name}: ${review}`} onClick={(e) => { e.stopPropagation(); if (data.agent) data.onInspect(data.agent); }}>{review}</Button>}
         </div>}
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">

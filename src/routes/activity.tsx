@@ -25,7 +25,7 @@ function ActivityPage() {
         const undoable = (entry.kind === "pause" || entry.kind === "rule") && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone)?.id === entry.id;
         return <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
           <div><p className="font-medium">{entry.message}</p><p className="mt-1 text-sm text-muted-foreground"><time>{entry.time}</time> · Finance lead{entry.undone ? " · Undone" : ""}</p></div>
-          {undoable && <Button variant="outline" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => dispatch({ type: "undo", id: entry.id, time: actionTime() })}><Undo2 />Undo</Button>}
+          {undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => dispatch({ type: "undo", id: entry.id, time: actionTime() })}><Undo2 />Undo</Button>}
         </li>;
       })}</ol>}
   </AppShell>;
