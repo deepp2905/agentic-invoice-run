@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
 function RunsPage() {
   return (
     <AppShell>
-      <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-lg border border-destructive/50 bg-destructive/10 px-6 py-5">
+      <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-lg border border-destructive/25 bg-destructive/10 px-6 py-5">
         <div className="flex items-start gap-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <div>
@@ -52,7 +52,7 @@ function RunsPage() {
           <tbody>
             {runs.map((r) => (
               <tr key={r.id} className="border-t border-border">
-                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <span className="mt-2 block w-fit whitespace-nowrap rounded border border-warning/40 bg-warning/10 px-2 py-1 text-xs text-warning">Possible duplicate</span>}</td>
+                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <span className="mt-2 block w-fit whitespace-nowrap rounded border border-warning/25 bg-warning/10 px-2 py-1 text-xs text-warning">Possible duplicate</span>}</td>
                 <td className="px-6 py-4">{r.vendor}</td>
                 <td className="px-6 py-4">{r.amount}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>

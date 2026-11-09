@@ -90,16 +90,20 @@
 .toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--primary); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--warning); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--destructive); }
-.outcome-running, .outcome-success { border-color: var(--primary); }
+.outcome-running, .outcome-success { border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); }
 .outcome-running .node-status, .outcome-success .node-status { color: var(--primary); }
-.outcome-warning { border-color: var(--warning); }
+.outcome-warning { border-color: color-mix(in oklab, var(--warning) 45%, var(--border)); }
 .outcome-warning .node-status { color: var(--warning); }
-.outcome-failed { border-color: var(--destructive); }
+.outcome-failed { border-color: color-mix(in oklab, var(--destructive) 45%, var(--border)); }
 .outcome-failed .node-status { color: var(--destructive); }
 .outcome-pending .node-status, .outcome-skipped .node-status { color: var(--muted-foreground); }
 .flow-string-arrow { fill: var(--canvas-wire); }
 .flow-string-active .react-flow__edge-path, .flow-string-success .react-flow__edge-path { stroke: var(--primary); }
 .flow-string-active .flow-string-arrow, .flow-string-success .flow-string-arrow { fill: var(--primary); }
+.flow-string-warning .react-flow__edge-path { stroke: var(--warning); }
+.flow-string-warning .flow-string-arrow { fill: var(--warning); }
+.flow-string-failed .react-flow__edge-path { stroke: var(--destructive); }
+.flow-string-failed .flow-string-arrow { fill: var(--destructive); }
 .flow-string-pulse { fill: none; stroke: var(--primary); stroke-width: 4; stroke-dasharray: 12 18; animation: string-transfer 550ms linear infinite; pointer-events: none; }
 @keyframes string-transfer { to { stroke-dashoffset: -60; } }
 @media (prefers-reduced-motion: reduce) {
