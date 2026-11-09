@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Chip, Notice, PageTitle, Surface } from "@/components/system";
-import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
+import { IconAlertTriangle as AlertTriangle, IconArrowRight as ArrowRight } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { alert, runs } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
@@ -47,9 +47,10 @@ function RunsPage() {
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
                 <td className="px-6 py-4 text-right">
-                  <Button asChild size="sm" variant={r.id === alert.runId ? "destructive" : r.id === "INV-4821" ? "warning" : "secondary"}>
-                    <Link to="/runs/$runId" params={{ runId: r.id === "INV-4821" ? alert.runId : r.id }}>
-                      {r.id === alert.runId ? "Fix" : r.id === "INV-4821" ? "Investigate" : "View run"}
+                  <Button asChild size="sm" className="w-32 justify-between" variant={r.id.startsWith("INV-4821") ? "destructive" : "secondary"}>
+                    <Link to="/runs/$runId" params={{ runId: r.id.startsWith("INV-4821") ? alert.runId : r.id }}>
+                      {r.id.startsWith("INV-4821") ? "Investigate" : "View run"}
+                      <ArrowRight className="size-4" />
                     </Link>
                   </Button>
                 </td>
