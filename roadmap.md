@@ -1,4 +1,5 @@
 # Prototype additions
+- [x] Give every listed run its own mock agents, evidence, receipts and replay outcome; verify navigation and duplicate regressions
 - [x] Correct saved-rule replay and toast sequencing; pause only duplicates; separate controls and clear edge labels; verify Undo and replay
 - [x] Left-to-right rows, elbow handoff, compact nodes/header, interruptible focus, centered toasts, instant pause, and regression verification
 - [x] Enlarge the fitted canvas and Matching, label handoffs, relocate toasts, and verify held replay plus existing actions

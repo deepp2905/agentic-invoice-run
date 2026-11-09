@@ -7,9 +7,10 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { queuedInvoices, queuedInvoiceState, type DuplicateRule } from "@/lib/prototype-state";
 import { toast } from "sonner";
 import type { Agent } from "@/lib/mock-data";
+import type { RunDetail } from "@/lib/mock-runs";
 
 export type InvestigationPanel = Agent | "pause" | "rule" | null;
-export function InvestigationPanels({ panel, onClose }: { panel: InvestigationPanel; onClose: () => void }) {
+export function InvestigationPanels({ run, panel, onClose }: { run: RunDetail; panel: InvestigationPanel; onClose: () => void }) {
   const { state, dispatch } = usePrototype();
   const [draft, setDraft] = useState<DuplicateRule>(state.rule);
   useEffect(() => { if (panel === "rule") setDraft(state.rule); }, [panel, state.rule]);
@@ -19,19 +20,19 @@ export function InvestigationPanels({ panel, onClose }: { panel: InvestigationPa
       <SheetTitle>{agent?.name ?? (panel === "pause" ? "Similar queued invoices" : "Edit duplicate rule")}</SheetTitle>
       <SheetDescription className="mt-2">{agent?.summary ?? (panel === "pause" ? `Harbor Office Supply · ${state.paused ? "2 paused, 1 safe to release" : "2 queued, 1 safe to release"}` : "Duplicate invoice check")}</SheetDescription>
       {agent && <>
-        {agent.id === "matching" && <section className="mt-7">
+        {agent.id === "matching" && run.duplicate && <section className="mt-7">
           <h3 className="font-medium">Why did it do that?</h3>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Vendor, amount and PO matched an earlier invoice, but the invoice number differed by one suffix, so confidence dropped to 62%. It handed off without a flag.</p>
         </section>}
         {agent.id === "policy" && <section className="mt-7 border-y border-border py-4 text-sm">
-          <p className="font-medium">Duplicate check: {state.rule === "exact" ? "matches exact invoice number only" : "matches vendor + amount + PO"}</p>
+          <p className="font-medium">Duplicate check: {run.duplicate ? state.rule === "exact" ? "matches exact invoice number only" : "matches vendor + amount + PO" : "no prior payment at processing time"}</p>
           <p className={`mt-3 ${toneText[agent.summary.includes("exception") ? "warning" : "success"]}`}>Result: {agent.summary.includes("exception") ? "Exception raised" : "Passed"}</p>
-          <p className="mt-2 text-muted-foreground">{agent.summary.includes("exception") ? "Vendor, amount and PO match INV-4821." : "No match found because the numbers differ."}</p>
+          <p className="mt-2 text-muted-foreground">{agent.summary.includes("exception") ? "Vendor, amount and PO match INV-4821." : run.duplicate ? "No match found because the numbers differ." : `No earlier payment found for ${run.id} or ${run.po}.`}</p>
         </section>}
         <SectionLabel className="mt-8">Steps</SectionLabel>
         <ol className="mt-4 flex flex-col gap-4">{agent.steps.map((step, i) => <li key={step} className="flex gap-3 text-sm"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs">{i + 1}</span><span className="pt-0.5">{step}</span></li>)}</ol>
         <SectionLabel className="mt-8">Evidence</SectionLabel>
-        {agent.id === "matching" && <>
+        {agent.id === "matching" && run.duplicate && <>
           <div className="mt-4 grid grid-cols-2 divide-x divide-border rounded-md border border-border text-sm">
             {[{ invoice: "INV-4821", date: "Paid Oct 29" }, { invoice: "INV-4821-A", date: "Nov 7" }].map((invoice) => <div key={invoice.invoice} className="space-y-4 p-3">
               <Field label="Invoice number" tone="warning"><span className="break-all font-mono">{invoice.invoice}</span></Field>
