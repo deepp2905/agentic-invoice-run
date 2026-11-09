@@ -53,7 +53,7 @@ export function PageTitle({ children }: { children: ReactNode }) {
 }
 
 export function SectionLabel({ className, children }: { className?: string; children: ReactNode }) {
-  return <h3 className={cn("text-xs uppercase text-muted-foreground", className)}>{children}</h3>;
+  return <h3 className={cn("text-xs font-medium text-muted-foreground", className)}>{children}</h3>;
 }
 
 export function Field({ label, children, tone }: { label: string; children: ReactNode; tone?: Tone }) {

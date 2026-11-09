@@ -11,7 +11,7 @@
 @import "@xyflow/react/dist/style.css";
 
 /*
- * Design system definition: industrial dark.
+ * Design system definition: neutral dark (Vercel-like).
  *
  * Near-black background, dark steel panels, thin flat lines. Hazard yellow marks
  * warnings, red marks failure, green marks passing. Condensed grotesk headings,
@@ -31,9 +31,9 @@
   --text-2xs--line-height: 0.875rem;
   --text-caption: 0.6875rem;
   --text-caption--line-height: 1.1rem;
-  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Oswald", "Archivo", ui-sans-serif, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Geist", ui-sans-serif, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -117,50 +117,49 @@
 
 :root {
   --radius: 0.5rem;
-  /* Background #0E0F11, panels #1A1C20, text #ECEAE4, dim #8B8E94,
-     hazard yellow #FFC400, red #FF4B3E, green #3DDC97 */
-  --background: oklch(0.165 0.005 260);
-  --foreground: oklch(0.93 0.008 90);
-  --card: oklch(0.215 0.008 260);
-  --card-foreground: oklch(0.93 0.008 90);
-  --popover: oklch(0.215 0.008 260);
-  --popover-foreground: oklch(0.93 0.008 90);
-  --primary: oklch(0.79 0.17 160);
-  --primary-foreground: oklch(0.165 0.005 260);
-  --secondary: oklch(0.26 0.008 260);
-  --secondary-foreground: oklch(0.93 0.008 90);
-  --muted: oklch(0.26 0.008 260);
-  --muted-foreground: oklch(0.63 0.012 260);
-  --accent: oklch(0.26 0.008 260);
-  --accent-foreground: oklch(0.93 0.008 90);
-  --destructive: oklch(0.63 0.22 27);
-  --destructive-foreground: oklch(0.165 0.005 260);
-  --warning: oklch(0.83 0.16 90);
-  --success: oklch(0.79 0.17 160);
+  /* Neutral grayscale (zero chroma); color only for state: green success, yellow warning, red failure. */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.18 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.95 0 0);
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.235 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.235 0 0);
+  --muted-foreground: oklch(0.68 0 0);
+  --accent: oklch(0.235 0 0);
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.64 0.21 25);
+  --destructive-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.83 0.16 85);
+  --success: oklch(0.76 0.17 155);
   /* Canvas geometry */
   --node-width: 230px;
   --handle-size: 7px;
   --handle-stroke: 2px;
-  --edge-width: 2.5;
+  --edge-width: 2;
   --edge-pulse-width: 4;
-  --border: oklch(0.27 0.01 260);
-  --canvas-dot: oklch(0.26 0.006 260);
-  --canvas-wire: oklch(0.72 0.008 260);
-  --input: oklch(0.27 0.01 260);
-  --ring: oklch(0.79 0.17 160);
-  --chart-1: oklch(0.79 0.17 160);
-  --chart-2: oklch(0.83 0.16 90);
-  --chart-3: oklch(0.63 0.22 27);
-  --chart-4: oklch(0.63 0.012 260);
-  --chart-5: oklch(0.93 0.008 90);
-  --sidebar: oklch(0.19 0.007 260);
-  --sidebar-foreground: oklch(0.93 0.008 90);
-  --sidebar-primary: oklch(0.79 0.17 160);
-  --sidebar-primary-foreground: oklch(0.165 0.005 260);
-  --sidebar-accent: oklch(0.26 0.008 260);
-  --sidebar-accent-foreground: oklch(0.93 0.008 90);
-  --sidebar-border: oklch(0.27 0.01 260);
-  --sidebar-ring: oklch(0.79 0.17 160);
+  --border: oklch(0.27 0 0);
+  --canvas-dot: oklch(0.27 0 0);
+  --canvas-wire: oklch(0.55 0 0);
+  --input: oklch(0.27 0 0);
+  --ring: oklch(0.7 0 0);
+  --chart-1: oklch(0.76 0.17 155);
+  --chart-2: oklch(0.83 0.16 85);
+  --chart-3: oklch(0.64 0.21 25);
+  --chart-4: oklch(0.68 0 0);
+  --chart-5: oklch(0.95 0 0);
+  --sidebar: oklch(0.145 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.95 0 0);
+  --sidebar-primary-foreground: oklch(0.145 0 0);
+  --sidebar-accent: oklch(0.235 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.27 0 0);
+  --sidebar-ring: oklch(0.7 0 0);
 }
 
 @layer base {
@@ -178,8 +177,7 @@
   h2,
   h3 {
     font-family: var(--font-serif);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.02em;
   }
 
   /* Tabular numerals for invoice numbers and amounts */

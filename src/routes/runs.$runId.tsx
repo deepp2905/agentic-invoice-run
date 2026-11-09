@@ -55,7 +55,7 @@ function RunView() {
     <header className="shrink-0 border-b border-border bg-background px-6 py-5 max-sm:px-4">
       <Link to="/" className="mb-3 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" />Runs</Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h1 className="font-serif text-3xl font-semibold uppercase sm:text-4xl">$12,480 paid twice</h1><p className="mt-2 text-xs text-muted-foreground"><span className="font-mono">{runId}</span> · Nov 7, 09:14 · Harbor Office Supply</p></div>
+        <div><h1 className="text-2xl font-semibold sm:text-3xl">$12,480 paid twice</h1><p className="mt-2 text-xs text-muted-foreground"><span className="font-mono">{runId}</span> · Nov 7, 09:14 · Harbor Office Supply</p></div>
         <Button variant="outline" className="shadow-none" disabled={running} onClick={() => { setSelected(null); setReplay(startReplay(state.rule)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
       </div>
       {replay?.phase === "complete" && <div role="status" className={`mt-3 text-sm font-semibold ${caught ? "text-success" : "text-destructive"}`}>{caught ? "Duplicate caught · Held at Policy · Payment skipped" : "Paid again · Duplicate was not caught"}</div>}

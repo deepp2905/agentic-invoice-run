@@ -27,7 +27,7 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
             <Toggle className="h-4 w-4" />
           </button></Hint>
         </div>
-        {!collapsed && <p className="mb-2 px-3 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">Workspace</p>}
+        {!collapsed && <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">Workspace</p>}
         <nav className="flex flex-col gap-1">
           {nav.map(({ to, label, icon: Icon, exact }) => (
             <Hint key={to} label={collapsed ? label : undefined} side="right"><Link to={to} aria-label={label}
