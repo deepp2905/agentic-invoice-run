@@ -56,7 +56,7 @@ function StringEdge(props: EdgeProps) {
       : bezier;
   const active = props.data?.['active'] === true;
   return <g className={`flow-string ${active ? "flow-string-active" : ""}`}>
-    <BaseEdge id={props.id} path={path} markerEnd={props.markerEnd} />
+    <BaseEdge id={props.id} path={path} {...(props.markerEnd ? { markerEnd: props.markerEnd } : {})} />
     {active && <path d={path} className="flow-string-pulse" />}
   </g>;
 }
