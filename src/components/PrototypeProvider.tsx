@@ -1,7 +1,7 @@
-import { createContext, useCallback, useContext, useReducer, useRef, type Dispatch, type ReactNode } from "react";
-import { initialPrototypeState, prototypeReducer, type PrototypeAction, type PrototypeState } from "@/lib/prototype-state";
+import { useCallback, useContext, useReducer, useRef, type ReactNode } from "react";
+import { initialPrototypeState, prototypeReducer, type PrototypeAction } from "@/lib/prototype-state";
+import { PrototypeContext } from "@/components/prototype-context";
 
-const PrototypeContext = createContext<{ state: PrototypeState; dispatch: Dispatch<PrototypeAction>; getCurrentState: () => PrototypeState } | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) {
   const [state, reducerDispatch] = useReducer(prototypeReducer, initialPrototypeState);
   const current = useRef(state);
