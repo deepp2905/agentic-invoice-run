@@ -39,7 +39,7 @@ function RunView() {
       if (replay.phase === "running") {
         const name = agents[replay.index]?.name ?? "Agent";
         const outcome = nodeOutcome(replay.index, next);
-        if (outcome === "warning") toast.warning(`${name} needs review`, { description: "62% confidence · Handed off without a flag", duration: 3500 });
+        if (outcome === "warning") toast.warning(`${name} needs review`, { description: next.rule === "combined" ? "62% confidence · Duplicate flagged" : "62% confidence · Handed off without a flag", duration: 3500 });
         else if (outcome === "failed") toast.error(`${name} held payment`, { description: "Duplicate caught · Payment skipped", duration: 4500 });
         else toast.success(`${name} completed`, { duration: 2500 });
       }

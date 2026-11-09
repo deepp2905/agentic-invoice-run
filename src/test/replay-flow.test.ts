@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { advanceReplay, nodeOutcome, startReplay } from "@/lib/replay-flow";
+import { advanceReplay, handoffOutcome, hasNewReceipt, nodeOutcome, startReplay } from "@/lib/replay-flow";
 
 describe("Investigation replay", () => {
+  it("marks Matching's outgoing handoff failed after it flags the duplicate under the fixed rule", () => {
+    let replay = startReplay("combined");
+    replay = advanceReplay(advanceReplay(replay));
+    expect(handoffOutcome(1, replay)).toBe("running");
+    expect(handoffOutcome(1, advanceReplay(replay))).toBe("failed");
+    expect(handoffOutcome(1, { rule: "exact", index: 1, phase: "handoff" })).toBe("warning");
+  });
+  it("never creates a new receipt when the fixed rule holds payment", () => {
+    let replay = startReplay("combined");
+    while (replay.phase !== "complete") {
+      expect(hasNewReceipt(replay)).toBe(false);
+      replay = advanceReplay(replay);
+    }
+    expect(hasNewReceipt(replay)).toBe(false);
+    expect(hasNewReceipt({ rule: "exact", index: 3, phase: "complete" })).toBe(true);
+  });
   it("runs only the current agent and leaves future agents pending", () => {
     const replay = startReplay("exact");
     expect([0, 1, 2, 3].map(i => nodeOutcome(i, replay))).toEqual(["running", "pending", "pending", "pending"]);
