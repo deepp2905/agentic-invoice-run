@@ -89,12 +89,24 @@
 }
 .inspection-node {
   width: var(--node-width);
+  font-size: var(--node-text-size);
+  line-height: var(--node-line-height);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   background: var(--card);
   color: var(--foreground);
   cursor: grab;
 }
+.inspection-node-matching { width: var(--matching-node-width); border-color: var(--warning); }
+.node-heading { min-height: var(--node-heading-height); font-size: var(--node-heading-size); }
+.node-actions { min-height: var(--node-actions-height); }
+.node-review, .node-tag { font-size: var(--node-text-size); }
+.node-review { min-height: var(--node-actions-height); }
+.confidence-value { font-size: var(--confidence-size); line-height: 1; }
+.confidence-meter { height: var(--confidence-meter-height); background: var(--secondary); border-radius: var(--radius-sm); overflow: hidden; }
+.confidence-meter-fill { width: 62%; height: 100%; background: var(--warning); }
+.outcome-skipped { background: var(--muted-surface); border-color: var(--border); color: var(--muted-foreground); }
+.flow-edge-label { position: absolute; max-width: var(--edge-label-width); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
 .inspection-node .react-flow__handle { width: var(--handle-size); height: var(--handle-size); min-width: var(--handle-size); min-height: var(--handle-size); border-width: var(--handle-stroke); }
 .inspection-node .connection-target { opacity: 0; pointer-events: none; }
@@ -117,6 +129,8 @@
 .flow-string-failed .react-flow__edge-path { stroke: var(--destructive); }
 .flow-string-failed .flow-string-arrow { fill: var(--destructive); }
 .flow-string-pulse { fill: none; stroke: var(--success); stroke-width: var(--edge-pulse-width); stroke-dasharray: 12 18; animation: string-transfer 550ms linear infinite; pointer-events: none; }
+.flow-string-warning .flow-string-pulse { stroke: var(--warning); }
+.flow-string-failed .flow-string-pulse { stroke: var(--destructive); }
 @keyframes string-transfer { to { stroke-dashoffset: -60; } }
 @media (prefers-reduced-motion: reduce) {
   .flow-string-pulse { animation: none; stroke-dasharray: none; }
@@ -155,7 +169,18 @@
   --destructive-soft-hover: color-mix(in oklab, var(--destructive) 24%, var(--secondary));
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
-  --node-width: 230px;
+  --node-width: 280px;
+  --matching-node-width: 340px;
+  --node-text-size: 20px;
+  --node-heading-size: 20px;
+  --node-line-height: 1.35;
+  --node-heading-height: 56px;
+  --node-actions-height: 44px;
+  --confidence-size: 64px;
+  --confidence-meter-height: 6px;
+  --edge-label-size: 18px;
+  --edge-label-width: 180px;
+  --edge-label-padding: 4px 8px;
   --handle-size: 7px;
   --handle-stroke: 2px;
   --edge-width: 2;
@@ -195,7 +220,7 @@
   h2,
   h3 {
     font-family: var(--font-serif);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   /* Tabular numerals for invoice numbers and amounts */
