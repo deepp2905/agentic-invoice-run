@@ -146,11 +146,11 @@
   --destructive-foreground: oklch(0.145 0 0);
   --warning: oklch(0.82 calc(0.16 * var(--state-chroma)) 85);
   /* Soft state fills: a faint tint over the secondary gray, text in the full state color. */
-  --warning-soft: color-mix(in oklab, var(--warning) 14%, var(--secondary));
+  --warning-soft: color-mix(in oklab, var(--warning) 14%, oklch(0.22 0 0));
   --warning-soft-foreground: var(--warning);
   --destructive-soft: color-mix(in oklab, var(--destructive) 16%, var(--secondary));
   --destructive-soft-foreground: var(--destructive);
-  --warning-soft-hover: color-mix(in oklab, var(--warning) 22%, var(--secondary));
+  --warning-soft-hover: color-mix(in oklab, var(--warning) 18%, var(--secondary));
   --destructive-soft-hover: color-mix(in oklab, var(--destructive) 24%, var(--secondary));
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
