@@ -1,27 +1,44 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, ShieldCheck, History } from "lucide-react";
-import type { ReactNode } from "react";
+import { Activity, ShieldCheck, History, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+
+const nav = [
+  { to: "/", label: "Runs", icon: Activity, exact: true },
+  { to: "/rules", label: "Rules", icon: ShieldCheck, exact: false },
+  { to: "/activity", label: "Activity", icon: History, exact: false },
+] as const;
 
 export function AppShell({ children, canvas = false }: { children: ReactNode; canvas?: boolean }) {
-  const item =
-    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => { setCollapsed(localStorage.getItem("sidebar-collapsed") === "1"); }, []);
+  const toggle = () => setCollapsed(c => { localStorage.setItem("sidebar-collapsed", c ? "0" : "1"); return !c; });
+  const Toggle = collapsed ? PanelLeftOpen : PanelLeftClose;
   return (
     <div className={`flex w-full bg-background text-foreground ${canvas ? "h-dvh overflow-hidden" : "min-h-screen"}`}>
-      <aside className="w-44 shrink-0 border-r border-border bg-sidebar px-3 py-6 lg:w-60 lg:px-4 max-sm:w-16 max-sm:px-2">
-        <div className="mb-8 px-3 text-sm font-semibold max-sm:hidden">
-          <span className="text-primary">●</span> Ledger Watch
+      <aside className={`sticky top-0 flex h-dvh shrink-0 flex-col border-r border-border bg-sidebar py-4 transition-[width] duration-200 ${collapsed ? "w-16 px-2" : "w-60 px-3"}`}>
+        <div className={`mb-6 flex items-center ${collapsed ? "flex-col gap-3" : "justify-between px-2"}`}>
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">LW</span>
+            {!collapsed && <span>Ledger Watch</span>}
+          </div>
+          <button onClick={toggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} title={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <Toggle className="h-4 w-4" />
+          </button>
         </div>
+        {!collapsed && <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Workspace</p>}
         <nav className="flex flex-col gap-1">
-          <Link to="/" aria-label="Runs" className={item} activeProps={{ className: "bg-secondary !text-foreground" }} activeOptions={{ exact: true, includeSearch: false }}>
-            <Activity className="h-4 w-4 shrink-0" /> <span className="max-sm:hidden">Runs</span>
-          </Link>
-          <Link to="/rules" aria-label="Rules" className={item} activeProps={{ className: "bg-secondary !text-foreground" }}>
-            <ShieldCheck className="h-4 w-4 shrink-0" /> <span className="max-sm:hidden">Rules</span>
-          </Link>
-          <Link to="/activity" aria-label="Activity" className={item} activeProps={{ className: "bg-secondary !text-foreground" }}>
-            <History className="h-4 w-4 shrink-0" /> <span className="max-sm:hidden">Activity</span>
-          </Link>
+          {nav.map(({ to, label, icon: Icon, exact }) => (
+            <Link key={to} to={to} aria-label={label} title={collapsed ? label : undefined}
+              className={`flex items-center gap-3 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? "justify-center px-0" : "px-3"}`}
+              activeProps={{ className: "bg-secondary !text-foreground" }} activeOptions={{ exact, includeSearch: false }}>
+              <Icon className="h-4 w-4 shrink-0" />{!collapsed && <span>{label}</span>}
+            </Link>
+          ))}
         </nav>
+        <div className={`mt-auto flex items-center gap-3 border-t border-border pt-4 ${collapsed ? "justify-center" : "px-2"}`}>
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground" title={collapsed ? "Neha Hiremath" : undefined}>N</span>
+          {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
+        </div>
       </aside>
       <main className={canvas ? "flex min-h-0 min-w-0 flex-1 flex-col" : "min-w-0 flex-1 px-6 py-10 lg:px-12 max-sm:px-4"}>{children}</main>
     </div>
