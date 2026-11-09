@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
 import { Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
@@ -52,19 +52,22 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
 }
 
 function StringEdge(props: EdgeProps) {
-  const [bezier] = getBezierPath({ ...props, curvature: 0.55 });
-  const vertical = Math.abs(props.sourceX - props.targetX) < 20 && ((props.sourcePosition === Position.Bottom && props.targetPosition === Position.Top) || (props.sourcePosition === Position.Top && props.targetPosition === Position.Bottom));
-  const horizontal = Math.abs(props.sourceY - props.targetY) < 20 && ((props.sourcePosition === Position.Right && props.targetPosition === Position.Left) || (props.sourcePosition === Position.Left && props.targetPosition === Position.Right));
-  const path = vertical
-    ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + 50},${props.sourceY + (props.targetY - props.sourceY) / 3} ${props.targetX + 50},${props.targetY - (props.targetY - props.sourceY) / 3} ${props.targetX},${props.targetY}`
-    : horizontal
-      ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + (props.targetX - props.sourceX) / 3},${props.sourceY + 40} ${props.targetX - (props.targetX - props.sourceX) / 3},${props.targetY + 40} ${props.targetX},${props.targetY}`
-      : bezier;
+  // Outward unit normals of each port's card edge.
+  const normals = { [Position.Left]: [-1, 0], [Position.Right]: [1, 0], [Position.Top]: [0, -1], [Position.Bottom]: [0, 1] } as const;
+  const [snx, sny] = normals[props.sourcePosition];
+  const [tnx, tny] = normals[props.targetPosition];
+  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = props;
+  const arrow = 10;
+  // Stroke stops at the arrow's base; the arrow fills the last 10px to the card edge.
+  const ex = tx + tnx * arrow, ey = ty + tny * arrow;
+  const reach = Math.min(160, Math.max(40, Math.hypot(ex - sx, ey - sy) * 0.4));
+  // Last control point sits on the target normal, so the end tangent is perpendicular to the edge.
+  const path = `M ${sx},${sy} C ${sx + snx * reach},${sy + sny * reach} ${ex + tnx * reach},${ey + tny * reach} ${ex},${ey}`;
   const active = props.data?.['active'] === true;
   const successful = props.data?.['successful'] === true;
   const markerId = `curve-arrow-${props.id}`;
   return <g className={`flow-string ${active ? "flow-string-active" : ""} ${successful ? "flow-string-success" : ""}`}>
-    <defs><marker id={markerId} viewBox="-10 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M -10,-5 L 0,0 L -10,5 Z" className="flow-string-arrow" /></marker></defs>
+    <defs><marker id={markerId} viewBox="0 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0,-5 L 10,0 L 0,5 Z" className="flow-string-arrow" /></marker></defs>
     <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
   </g>;
