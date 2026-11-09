@@ -60,10 +60,10 @@ export function Field({ label, children, tone }: { label: string; children: Reac
   return <div><p className="text-xs text-muted-foreground">{label}</p><p className={cn("mt-1 text-sm", tone && tone !== "neutral" && toneText[tone])}>{children}</p></div>;
 }
 
-export function IconButton({ label, icon: Icon, onClick, side }: { label: string; icon: ComponentType; onClick: () => void; side?: "top" | "right" | "bottom" | "left" }) {
+export function IconButton({ label, icon: Icon, onClick, side }: { label: string; icon: ComponentType; onClick: () => void; side?: "top" | "right" | "bottom" | "left" | undefined }) {
   return <Hint label={label} side={side}><Button variant="ghost" size="icon" aria-label={label} onClick={onClick}><Icon /></Button></Hint>;
 }
 
-export function Avatar({ name, label }: { name: string; label?: string }): ReactElement {
+export function Avatar({ name, label }: { name: string; label?: string | undefined }): ReactElement {
   return <Hint label={label} side="right"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{name.charAt(0)}</span></Hint>;
 }
