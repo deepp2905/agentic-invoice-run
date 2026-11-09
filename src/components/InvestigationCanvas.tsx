@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Background, BackgroundVariant, BaseEdge, Handle, MarkerType, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { ArrowUpRight, Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
+import { Background, BackgroundVariant, BaseEdge, Handle, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+import { Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
@@ -36,7 +36,7 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
         <div className="flex h-7 items-center justify-between rounded-md bg-muted/50 px-2.5 text-[10px]"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></div>
         <div className="flex h-9 items-center justify-between gap-2 px-1">
           {data.outcome !== "success" ? <span className="node-status text-[10px]" role="status">{labels[data.outcome]}</span> : <span />}
-          <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-[10px] shadow-none ${data.outcome === "warning" ? "border-warning/50 text-warning" : data.outcome === "failed" ? "border-destructive/50 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}<ArrowUpRight className="h-3 w-3" /></Button>
+           <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-[10px] shadow-none ${data.outcome === "warning" ? "border-warning/50 text-warning" : data.outcome === "failed" ? "border-destructive/50 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}</Button>
         </div>
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">
@@ -61,8 +61,11 @@ function StringEdge(props: EdgeProps) {
       ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + (props.targetX - props.sourceX) / 3},${props.sourceY + 40} ${props.targetX - (props.targetX - props.sourceX) / 3},${props.targetY + 40} ${props.targetX},${props.targetY}`
       : bezier;
   const active = props.data?.['active'] === true;
-  return <g className={`flow-string ${active ? "flow-string-active" : ""}`}>
-    <BaseEdge id={props.id} path={path} {...(props.markerEnd ? { markerEnd: props.markerEnd } : {})} />
+  const successful = props.data?.['successful'] === true;
+  const markerId = `curve-arrow-${props.id}`;
+  return <g className={`flow-string ${active ? "flow-string-active" : ""} ${successful ? "flow-string-success" : ""}`}>
+    <defs><marker id={markerId} viewBox="-10 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M -10,-5 L 0,0 L -10,5 Z" className="flow-string-arrow" /></marker></defs>
+    <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
   </g>;
 }
@@ -102,7 +105,7 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
     const detail = outcome === "pending" ? "Awaiting invoice" : outcome === "running" ? "INV-4821-A · $12,480" : i === 2 ? combined ? "Possible duplicate of INV-4821" : "62%, handed off without a flag" : i === 3 && combined ? "Duplicate check failed · Payment held" : i === 4 && combined ? "Blocked by Policy" : agents[i - 1]?.summary ?? "";
     return { ...node, data: { ...node.data, incoming: connections[i - 1]?.target, outgoing: connections[i]?.source, outcome: i === 0 || i === 5 ? "pending" as const : outcome, detail, paused, onInspect, paidAgain: replay?.phase === "complete" && !combined } };
   });
-  const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 }, data: { active: replay?.phase === "handoff" && replay.index === i - 1 } }));
+  const edges: Edge[] = ids.slice(0, -1).map((source, i) => ({ id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, successful: visibleNodes[i + 1]?.data.outcome === "success" } }));
   return <div className="investigation-canvas relative min-h-0 flex-1" aria-label="Invoice investigation canvas">
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{ padding: 0.15 }} minZoom={0.25} maxZoom={1.8} nodeExtent={[[-1800, -1200], [3000, 2200]]} translateExtent={[[-2200, -1600], [3400, 2600]]} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
