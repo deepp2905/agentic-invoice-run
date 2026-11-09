@@ -27,3 +27,13 @@ export function nodeOutcome(index: number, replay: ReplayFlow | null): NodeOutco
   if (index === 2 && replay.rule === "combined") return "failed";
   return "success";
 }
+
+export function handoffOutcome(index: number, replay: ReplayFlow | null): NodeOutcome {
+  const outcome = nodeOutcome(index, replay);
+  if (index === 1 && replay?.rule === "combined" && outcome === "warning") return "failed";
+  return outcome;
+}
+
+export function hasNewReceipt(replay: ReplayFlow | null): boolean {
+  return replay?.phase === "complete" && replay.rule === "exact";
+}
