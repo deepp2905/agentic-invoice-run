@@ -31,7 +31,7 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
     </div>
     {data.agent ? <>
       <div className="flex flex-col gap-1.5 px-2 pb-2">
-        <div className="rounded-md bg-muted/50 px-2.5 py-2">
+        <InsetRow>
           <p className="mb-1 text-2xs text-muted-foreground">{data.agent.name}</p>
           <p className="min-h-8 text-caption leading-relaxed">{data.detail}</p>
         </div>
@@ -42,11 +42,11 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
         </div>
       </div>
     </> : <div className="space-y-1.5 px-2 pb-2">
-      {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`rounded-md bg-muted/50 px-2.5 py-2 ${invoice.legit ? "text-success" : data.paused ? "text-warning" : "text-foreground"}`}>
+      {data.kind === "queue" ? queuedInvoices.map(invoice => <InsetRow key={invoice.id} className={invoice.legit ? "text-success" : data.paused ? "text-warning" : "text-foreground"}>
         <p className="font-mono text-caption">{invoice.id}</p><p className="mt-1 text-2xs text-muted-foreground">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
       </div>) : <>
-        <div className="rounded-md bg-muted/50 px-2.5 py-2"><p className="font-mono text-caption">INV-4821</p><p className="mt-1 text-2xs text-muted-foreground">Paid Oct 29 · $12,480</p></div>
-        {data.paidAgain && <div className="rounded-md bg-destructive/10 px-2.5 py-2 text-destructive"><p className="font-mono text-caption">INV-4821-A</p><p className="mt-1 text-2xs">Paid again · $12,480</p></div>}
+        <InsetRow><p className="font-mono text-caption">INV-4821</p><p className="mt-1 text-2xs text-muted-foreground">Paid Oct 29 · $12,480</p></div>
+        {data.paidAgain && <InsetRow className="bg-destructive/10 text-destructive"><p className="font-mono text-caption">INV-4821-A</p><p className="mt-1 text-2xs">Paid again · $12,480</p></div>}
       </>}
     </div>}
     {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
@@ -84,11 +84,11 @@ function CanvasControls({ onReset }: { onReset: () => void }) {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { zoom } = useViewport();
   return <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded border border-border bg-card p-1">
-    <Hint label="Zoom out"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => zoomOut({ duration: 150 })}><Minus /></Button></Hint>
+    <IconButton label="Zoom out" icon={Minus} onClick={() => zoomOut({ duration: 150 })} />
     <span className="w-12 text-center font-mono text-2xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
-    <Hint label="Zoom in"><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => zoomIn({ duration: 150 })}><Plus /></Button></Hint>
-    <Hint label="Fit flow"><Button variant="ghost" size="icon" aria-label="Fit flow" onClick={() => fitView({ padding: 0.15, duration: 250 })}><Maximize /></Button></Hint>
-    <Hint label="Reset layout"><Button variant="ghost" size="icon" aria-label="Reset layout" onClick={onReset}><RotateCcw /></Button></Hint>
+    <IconButton label="Zoom in" icon={Plus} onClick={() => zoomIn({ duration: 150 })} />
+    <IconButton label="Fit flow" icon={Maximize} onClick={() => fitView({ padding: 0.15, duration: 250 })} />
+    <IconButton label="Reset layout" icon={RotateCcw} onClick={onReset} />
   </div>;
 }
 export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {

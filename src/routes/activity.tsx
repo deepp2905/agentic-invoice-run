@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageTitle } from "@/components/system";
 import { IconArrowBackUp as Undo2, IconHistory as History } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/activity")({
 function ActivityPage() {
   const { state, dispatch } = usePrototype();
   return <AppShell>
-    <h1 className="mb-6 text-2xl font-semibold">Activity</h1>
+    <PageTitle>Activity</PageTitle>
     {state.log.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No activity yet.</div> :
       <ol className="divide-y divide-border border-y border-border">{state.log.map((entry) => {
         const undoable = (entry.kind === "pause" || entry.kind === "rule") && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone)?.id === entry.id;

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Chip, Notice, PageTitle, Surface } from "@/components/system";
 import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { alert, runs } from "@/lib/mock-data";
@@ -21,26 +22,13 @@ export const Route = createFileRoute("/")({
 function RunsPage() {
   return (
     <AppShell>
-      <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-lg bg-destructive/10 px-6 py-5">
-        <div className="flex items-start gap-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
-          <div>
-            <p className="font-medium">
-              Invoice {alert.invoice} was paid twice, {alert.amount}.
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">Vendor: {alert.vendor}</p>
-          </div>
-        </div>
-        <Button asChild><Link
-          to="/runs/$runId"
-          params={{ runId: alert.runId }}
-        >
-          Investigate
-        </Link></Button>
-      </div>
+      <Notice tone="destructive" size="lg" icon={AlertTriangle} className="mb-10" action={<Button asChild><Link to="/runs/$runId" params={{ runId: alert.runId }}>Investigate</Link></Button>}>
+        <p className="text-base font-medium">Invoice {alert.invoice} was paid twice, {alert.amount}.</p>
+        <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}</p>
+      </Notice>
 
-      <h1 className="mb-6 text-2xl font-semibold">Runs</h1>
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <PageTitle>Runs</PageTitle>
+      <Surface className="overflow-x-auto bg-transparent">
         <table className="w-full text-sm">
           <thead className="bg-card text-left text-muted-foreground">
             <tr>
@@ -52,7 +40,7 @@ function RunsPage() {
           <tbody>
             {runs.map((r) => (
               <tr key={r.id} className="border-t border-border">
-                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <span className="mt-2 block w-fit whitespace-nowrap rounded bg-warning/10 px-2 py-1 text-xs text-warning">Possible duplicate</span>}</td>
+                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <Chip tone="warning" className="mt-2 flex">Possible duplicate</Chip>}</td>
                 <td className="px-6 py-4">{r.vendor}</td>
                 <td className="px-6 py-4">{r.amount}</td>
                 <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
@@ -61,7 +49,7 @@ function RunsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </Surface>
     </AppShell>
   );
 }

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageTitle, Surface } from "@/components/system";
 import { AppShell } from "@/components/AppShell";
 import { rules } from "@/lib/mock-data";
 import { usePrototype } from "@/components/PrototypeProvider";
@@ -21,13 +22,13 @@ function RulesPage() {
   const { state } = usePrototype();
   return (
     <AppShell>
-      <h1 className="mb-6 text-2xl font-semibold">Rules</h1>
+      <PageTitle>Rules</PageTitle>
       <div className="flex flex-col gap-4">
         {rules.map((r) => (
-          <div key={r.name} className="rounded-lg border border-border bg-card px-6 py-5">
+          <Surface key={r.name} className="px-6 py-5">
             <p className="font-medium">{r.name}</p>
             <p className="mt-1 text-sm text-muted-foreground">{r.name === "Duplicate invoice check" && state.rule === "combined" ? "Blocks payment when vendor, amount and PO match a previously paid invoice." : r.detail}</p>
-          </div>
+          </Surface>
         ))}
       </div>
     </AppShell>
