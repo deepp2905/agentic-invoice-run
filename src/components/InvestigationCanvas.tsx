@@ -44,7 +44,14 @@ function InspectionNode({ data }: NodeProps<FlowNode>) {
 }
 
 function StringEdge(props: EdgeProps) {
-  const [path] = getBezierPath({ ...props, curvature: 0.55 });
+  const [bezier] = getBezierPath({ ...props, curvature: 0.55 });
+  const vertical = Math.abs(props.sourceX - props.targetX) < 20;
+  const horizontal = Math.abs(props.sourceY - props.targetY) < 20;
+  const path = vertical
+    ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + 50},${props.sourceY + (props.targetY - props.sourceY) / 3} ${props.targetX + 50},${props.targetY - (props.targetY - props.sourceY) / 3} ${props.targetX},${props.targetY}`
+    : horizontal
+      ? `M ${props.sourceX},${props.sourceY} C ${props.sourceX + (props.targetX - props.sourceX) / 3},${props.sourceY + 40} ${props.targetX - (props.targetX - props.sourceX) / 3},${props.targetY + 40} ${props.targetX},${props.targetY}`
+      : bezier;
   const active = props.data?.['active'] === true;
   return <g className={`flow-string ${active ? "flow-string-active" : ""}`}>
     <BaseEdge id={props.id} path={path} />
