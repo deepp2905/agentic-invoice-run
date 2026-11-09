@@ -69,7 +69,7 @@ function RunDetailView({ run }: { run: RunDetail }) {
         else for (const index of completionAgents(replay)) toast.success(`${run.agents[index]?.name ?? "Agent"} completed`, { duration: 2500 });
       }
       if (next.phase === "complete") {
-        dispatch({ type: "replay", caught: run.duplicate && next.rule === "combined", time: actionTime(), completedRunId: run.duplicate ? undefined : run.id });
+        dispatch({ type: "replay", caught: run.duplicate && next.rule === "combined", time: actionTime(), ...(!run.duplicate ? { completedRunId: run.id } : {}) });
         if (!run.duplicate) toast.success("Run completed", { description: `${run.id} · ${run.amount} payment verified`, duration: 2500 });
         else if (next.rule === "exact") toast.error("Run completed with a duplicate payment", { description: "$12,480 paid again · Duplicate was not caught", duration: 2500 });
       }
