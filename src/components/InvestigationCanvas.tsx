@@ -40,7 +40,7 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
       <Chip tone={warningMatch ? "warning" : "success"} className="node-tag">{warningMatch ? "Should have been caught" : "Verified PO match"}</Chip>
       <Button variant="outline" className="node-review nodrag nopan w-full shadow-none" aria-label="Matching: Review match" onClick={inspect}>Review match</Button>
     </> : data.agent ? <>
-      <Button variant="ghost" className="node-detail nodrag nopan" aria-label={matching ? "Matching: Review match" : `Open ${data.agent.name} details`} onClick={inspect}>{data.detail}</Button>
+      <Button variant="ghost" className="node-detail nodrag nopan" aria-label={matching ? "Matching: Review match" : `Open ${data.agent.name} details`} onClick={inspect}>{matching && data.outcome === "success" ? <><span>{data.run.po} ·</span><span className="text-success">{data.agent.confidence}% match</span></> : data.detail}</Button>
       {data.outcome === "failed" && <Button variant="destructive" className="nodrag nopan w-full" aria-label="Policy: Review hold" onClick={inspect}>Review hold</Button>}
     </> : data.kind === "queue" ? <div className="node-invoices">{data.run.queue.map(invoice => {
       const status = queuedInvoiceState(invoice, data.paused);

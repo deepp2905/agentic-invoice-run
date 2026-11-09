@@ -11,7 +11,8 @@ export const canvasLayout = {
 
 export function elbowHandoff(sx: number, sy: number, tx: number, ty: number) {
   const lane = (sy + ty) / 2;
-  return { path: `M ${sx},${sy} L ${sx},${lane} L ${tx},${lane} L ${tx},${ty - 10}`, labelX: (sx + tx) / 2, labelY: lane - 22 };
+  const midpoint = (sx + tx) / 2;
+  return { path: `M ${sx},${sy} C ${sx},${lane} ${sx},${lane} ${midpoint},${lane} C ${tx},${lane} ${tx},${lane} ${tx},${ty - 10}`, labelX: midpoint, labelY: lane - 22 };
 }
 
 export function easeInOut(progress: number) {
