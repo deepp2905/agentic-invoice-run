@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { advanceReplay, handoffOutcome, hasNewReceipt, nodeOutcome, startReplay } from "@/lib/replay-flow";
+import { advanceReplay, completionAgents, handoffOutcome, hasNewReceipt, nodeOutcome, savedRuleView, startReplay, startSavedReplay } from "@/lib/replay-flow";
+import { initialPrototypeState, prototypeReducer } from "@/lib/prototype-state";
 
 describe("Investigation replay", () => {
+  it("reads the saved rule for every replay, retaining held state until Activity undo", () => {
+    const saved = prototypeReducer(initialPrototypeState, { type: "rule", rule: "combined", time: "09:14" });
+    const replay = startSavedReplay(saved);
+    expect(replay.rule).toBe("combined");
+    expect(savedRuleView(null, saved.rule)).toEqual({ rule: "combined", index: 2, phase: "complete" });
+    expect(savedRuleView({ rule: "exact", index: 3, phase: "complete" }, saved.rule)?.rule).toBe("combined");
+    expect(startSavedReplay(prototypeReducer(saved, { type: "undo", id: 1, time: "09:15" })).rule).toBe("exact");
+  });
+  it("defers Policy completion until Issue payment finishes processing", () => {
+    expect(completionAgents({ rule: "exact", index: 2, phase: "running" })).toEqual([]);
+    expect(completionAgents({ rule: "exact", index: 3, phase: "handoff" })).toEqual([]);
+    expect(completionAgents({ rule: "exact", index: 3, phase: "running" })).toEqual([2, 3]);
+  });
   it("marks Matching's outgoing handoff failed after it flags the duplicate under the fixed rule", () => {
     let replay = startReplay("combined");
     replay = advanceReplay(advanceReplay(replay));

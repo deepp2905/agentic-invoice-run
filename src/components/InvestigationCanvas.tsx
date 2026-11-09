@@ -3,13 +3,13 @@ import { Background, BackgroundVariant, BaseEdge, EdgeLabelRenderer, Handle, Pos
 import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconLoader2 as LoaderCircle, IconMaximize as Maximize, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
-import { queuedInvoices } from "@/lib/prototype-state";
+import { queuedInvoices, queuedInvoiceState } from "@/lib/prototype-state";
 import { handoffOutcome, hasNewReceipt, nodeOutcome, type NodeOutcome, type ReplayFlow } from "@/lib/replay-flow";
 import { Hint } from "@/components/Hint";
 import { Chip, IconButton } from "@/components/system";
 import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
-import { canvasLayout, easeInOut, elbowHandoff } from "@/lib/canvas-layout";
+import { canvasLayout, clearLabelPosition, easeInOut, elbowHandoff, type CanvasBounds } from "@/lib/canvas-layout";
 
 type FlowData = { kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; count: number; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
 type FlowNode = Node<FlowData, "inspection">;
@@ -40,12 +40,25 @@ function InspectionNode({ id, data }: NodeProps<FlowNode>) {
     </> : data.agent ? <>
       <Button variant="ghost" className="node-detail nodrag nopan" aria-label={`Open ${data.agent.name} details`} onClick={inspect}>{data.detail}</Button>
       {data.outcome === "failed" && <Button variant="destructive" className="nodrag nopan w-full" aria-label="Policy: Review hold" onClick={inspect}>Review hold</Button>}
-    </> : data.kind === "queue" ? <div className="node-invoices">{queuedInvoices.map(invoice => <div key={invoice.id} className="flex flex-wrap items-center justify-between gap-1"><span className="font-mono">{invoice.id}</span><span className={data.paused ? "text-warning" : invoice.legit ? "text-success" : "text-muted-foreground"}>{data.paused ? "Paused" : invoice.legit ? "Safe to release" : "Queued"}</span></div>)}</div> : <div className="node-invoices"><p className="font-mono">INV-4821</p><p className="text-muted-foreground">Paid Oct 29 · $12,480</p>{data.paidAgain && <p className="text-destructive">INV-4821-A · Paid again · $12,480</p>}</div>}
+    </> : data.kind === "queue" ? <div className="node-invoices">{queuedInvoices.map(invoice => {
+      const status = queuedInvoiceState(invoice, data.paused);
+      return <div key={invoice.id} className="flex flex-wrap items-center justify-between gap-1"><span className="font-mono">{invoice.id}</span><span className={status === "safe" ? "text-success" : status === "paused" ? "text-warning" : "text-muted-foreground"}>{status === "safe" ? "Safe to release" : status === "paused" ? "Paused" : "Queued"}</span></div>;
+    })}</div> : <div className="node-invoices"><p className="font-mono">INV-4821</p><p className="text-muted-foreground">Paid Oct 29 · $12,480</p>{data.paidAgain && <p className="text-destructive">INV-4821-A · Paid again · $12,480</p>}</div>}
     {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
   </div>;
 }
 
 function StringEdge(props: EdgeProps) {
+  const { zoom } = useViewport();
+  const labelElement = useRef<HTMLDivElement>(null);
+  const [labelSize, setLabelSize] = useState({ width: 100, height: 68 });
+  useEffect(() => {
+    const element = labelElement.current;
+    if (!element) return;
+    const update = () => setLabelSize({ width: element.offsetWidth, height: element.offsetHeight });
+    const observer = new ResizeObserver(update); observer.observe(element); update();
+    return () => observer.disconnect();
+  }, [props.data?.['label']]);
   const normals = { [Position.Left]: [-1, 0], [Position.Right]: [1, 0], [Position.Top]: [0, -1], [Position.Bottom]: [0, 1] } as const;
   const [snx, sny] = normals[props.sourcePosition], [tnx, tny] = normals[props.targetPosition];
   const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = props;
@@ -57,12 +70,14 @@ function StringEdge(props: EdgeProps) {
   const stateClass = state === "success" ? "flow-string-success" : state === "warning" ? "flow-string-warning" : state === "failed" ? "flow-string-failed" : "";
   const markerId = `curve-arrow-${props.id}`, label = props.data?.['label'];
   const labelX = elbow?.labelX ?? (sx + 3 * (sx + snx * reach) + 3 * (ex + tnx * reach) + ex) / 8;
-  const labelY = elbow?.labelY ?? (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8 - 28;
+  const labelY = elbow ? elbow.labelY - labelSize.height : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8 + 12 / zoom;
+  const nodeBounds = props.data?.['bounds'] as CanvasBounds[] | undefined;
+  const labelPosition = clearLabelPosition(labelX, labelY, labelSize.width, labelSize.height, nodeBounds ?? [], 8 / zoom);
   return <><g className={`flow-string ${active ? "flow-string-active" : ""} ${stateClass}`}>
     <defs><marker id={markerId} viewBox="0 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0,-5 L 10,0 L 0,5 Z" className="flow-string-arrow" /></marker></defs>
     <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
-  </g>{typeof label === "string" && <EdgeLabelRenderer><div className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ transform: `translate(-50%, -100%) translate(${labelX}px, ${labelY}px)` }}>{label}</div></EdgeLabelRenderer>}</>;
+  </g>{typeof label === "string" && <EdgeLabelRenderer><div ref={labelElement} className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ transform: `translate(-50%, 0) translate(${labelPosition.x}px, ${labelPosition.y}px)` }}>{label}</div></EdgeLabelRenderer>}</>;
 }
 const nodeTypes = { inspection: InspectionNode }, edgeTypes = { string: StringEdge };
 const ids = ["queue", ...agents.map(a => a.id), "output"];
@@ -70,14 +85,14 @@ const ids = ["queue", ...agents.map(a => a.id), "output"];
 function CanvasControls({ onFull, onReset, onInterrupt }: { onFull: () => void; onReset: () => void; onInterrupt: () => void }) {
   const { zoomIn, zoomOut } = useReactFlow();
   const { zoom } = useViewport();
-  return <div className="canvas-controls absolute right-3 top-2 z-10 flex items-center gap-1 rounded-md border border-border bg-card p-1">
+  return <div className="canvas-control-band flex shrink-0 items-center border-t border-border bg-background px-3 py-2"><div className="canvas-controls flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-1">
     <Button variant="ghost" onClick={onFull}>Show full flow</Button>
     <IconButton label="Zoom out" icon={Minus} onClick={() => { onInterrupt(); zoomOut(); }} />
     <span className="w-12 text-center font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
     <IconButton label="Zoom in" icon={Plus} onClick={() => { onInterrupt(); zoomIn(); }} />
     <IconButton label="Fit flow" icon={Maximize} onClick={onFull} />
     <IconButton label="Reset layout" icon={RotateCcw} onClick={onReset} />
-  </div>;
+  </div></div>;
 }
 export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {
   return <ReactFlowProvider><Canvas {...props} /></ReactFlowProvider>;
@@ -151,9 +166,9 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => {
     const state = handoffOutcome(i - 1, replay);
     const label = i === 1 ? "Passed extracted fields" : i === 2 ? state === "failed" ? "Duplicate flagged" : "Handed off without a flag" : i === 3 && state !== "failed" ? "Approved for payment" : undefined;
-    return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2, elbow: i === 2 } };
+    return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2, elbow: i === 2, bounds } };
   });
-  return <div ref={container} className={`investigation-canvas relative min-h-0 flex-1 ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
+  return <div className="flex min-h-0 flex-1 flex-col"><div ref={container} className={`investigation-canvas relative min-h-0 flex-1 overflow-hidden ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} minZoom={canvasLayout.minimumZoom} maxZoom={1.8} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStart={interrupt} onNodeDragStop={(_, dragged) => setNodes(current => {
       const size = (n: FlowNode) => ({ width: n.measured?.width ?? 240, height: n.measured?.height ?? 140 });
       const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
@@ -161,7 +176,6 @@ function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paus
       return current.map(n => n.id === dragged.id ? { ...n, position } : n);
     })} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
-      <CanvasControls onInterrupt={interrupt} onFull={() => fullFlow()} onReset={() => { interrupt(); setNodes(current => current.map((node, i) => ({ ...node, position: canvasLayout.positions[i] ?? node.position }))); delay.current = setTimeout(() => fullFlow(), 100); }} />
     </ReactFlow>
-  </div>;
+  </div><CanvasControls onInterrupt={interrupt} onFull={() => fullFlow()} onReset={() => { interrupt(); setNodes(current => current.map((node, i) => ({ ...node, position: canvasLayout.positions[i] ?? node.position }))); delay.current = setTimeout(() => fullFlow(), 100); }} /></div>;
 }
