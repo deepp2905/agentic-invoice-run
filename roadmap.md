@@ -1,5 +1,5 @@
 # Prototype additions
-- [ ] Match reference workflow-card visual feel in dark mode and verify existing interactions
+- [x] Match reference workflow-card visual feel in dark mode and verify existing interactions
 - [x] Simplified contextual cards, outcome toasts, and single-row initial flow
 - [x] Dynamic facing-edge connections with origin-only dots and direction arrows
 - [x] Verify dragging, drawers, replay outcomes, and responsive layout
