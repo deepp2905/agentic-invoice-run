@@ -88,7 +88,7 @@ function StringEdge(props: EdgeProps) {
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
 const positions = [{ x: 0, y: 0 }, { x: 400, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 450 }, { x: 400, y: 450 }, { x: 0, y: 450 }];
-const fitOptions = { padding: { top: "12px", bottom: "64px", left: "12px", right: "12px" } as const, maxZoom: 1 };
+const fitOptions = { padding: { top: "8px", bottom: "40px", left: "12px", right: "12px" } as const, maxZoom: 1 };
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls({ onReset }: { onReset: () => void }) {
