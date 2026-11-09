@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Background, BackgroundVariant, BaseEdge, Handle, MarkerType, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+import { useEffect, useRef } from "react";
+import { Background, BackgroundVariant, BaseEdge, Handle, MarkerType, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
 import { ArrowUpRight, Check, CircleDashed, GripVertical, LoaderCircle, Maximize, Minus, Plus, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
@@ -79,6 +79,14 @@ export function InvestigationCanvas(props: { replay: ReplayFlow | null; paused: 
   return <ReactFlowProvider><Canvas {...props} /></ReactFlowProvider>;
 }
 function Canvas({ replay, paused, onInspect }: { replay: ReplayFlow | null; paused: boolean; onInspect: (agent: Agent) => void }) {
+  const initialized = useNodesInitialized();
+  const fitted = useRef(false);
+  const { fitView } = useReactFlow();
+  useEffect(() => {
+    if (!initialized || fitted.current) return;
+    const frame = requestAnimationFrame(() => { fitView({ padding: 0.15 }); fitted.current = true; });
+    return () => cancelAnimationFrame(frame);
+  }, [initialized, fitView]);
   const [nodes, , onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: positions[i] ?? { x: 0, y: 0 }, data: { kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, onInspect } })));
   const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? 230, height: node.measured?.height ?? 250 }));
   const connections = bounds.slice(0, -1).map((source, i) => connectionSides(source, bounds[i + 1] ?? source));
