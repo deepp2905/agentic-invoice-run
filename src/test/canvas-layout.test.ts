@@ -22,7 +22,7 @@ describe("Run canvas layout", () => {
     expect(canvasLayout.dimmedOpacity).toBe(0.4);
   });
   it("routes the Matching handoff in the empty lane between rows", () => {
-    expect(elbowHandoff(868, 262, 120, 380)).toEqual({ path: "M 868,262 L 868,321 L 120,321 L 120,370", labelX: 494, labelY: 299 });
+    expect(elbowHandoff(868, 262, 120, 380)).toEqual({ path: "M 868,262 C 868,321 868,321 494,321 C 120,321 120,321 120,370", labelX: 494, labelY: 299 });
   });
   it("uses an eased camera interpolation with exact endpoints", () => {
     expect([0, 0.25, 0.5, 0.75, 1].map(easeInOut)).toEqual([0, 0.125, 0.5, 0.875, 1]);
