@@ -2,11 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { Activity, ShieldCheck, History } from "lucide-react";
 import type { ReactNode } from "react";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, canvas = false }: { children: ReactNode; canvas?: boolean }) {
   const item =
     "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
   return (
-    <div className="flex min-h-screen w-full bg-background text-foreground">
+    <div className={`flex w-full bg-background text-foreground ${canvas ? "h-dvh overflow-hidden" : "min-h-screen"}`}>
       <aside className="w-44 shrink-0 border-r border-border bg-sidebar px-3 py-6 lg:w-60 lg:px-4 max-sm:w-16 max-sm:px-2">
         <div className="mb-8 px-3 text-sm font-semibold max-sm:hidden">
           <span className="text-primary">●</span> Ledger Watch
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </nav>
       </aside>
-      <main className="min-w-0 flex-1 px-6 py-10 lg:px-12 max-sm:px-4">{children}</main>
+      <main className={canvas ? "flex min-h-0 min-w-0 flex-1 flex-col" : "min-w-0 flex-1 px-6 py-10 lg:px-12 max-sm:px-4"}>{children}</main>
     </div>
   );
 }
