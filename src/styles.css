@@ -90,11 +90,11 @@
 .toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--primary); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--warning); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--destructive); }
-.outcome-running, .outcome-success { border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); }
+.outcome-running, .outcome-success { border-color: var(--primary); }
 .outcome-running .node-status, .outcome-success .node-status { color: var(--primary); }
-.outcome-warning { border-color: color-mix(in oklab, var(--warning) 45%, var(--border)); }
+.outcome-warning { border-color: var(--warning); }
 .outcome-warning .node-status { color: var(--warning); }
-.outcome-failed { border-color: color-mix(in oklab, var(--destructive) 45%, var(--border)); }
+.outcome-failed { border-color: var(--destructive); }
 .outcome-failed .node-status { color: var(--destructive); }
 .outcome-pending .node-status, .outcome-skipped .node-status { color: var(--muted-foreground); }
 .flow-string-arrow { fill: var(--canvas-wire); }
