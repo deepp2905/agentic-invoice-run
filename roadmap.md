@@ -1,4 +1,7 @@
 # Prototype additions
+- [ ] Simplified contextual cards, outcome toasts, and single-row initial flow
+- [ ] Dynamic facing-edge connections with origin-only dots and direction arrows
+- [ ] Verify dragging, drawers, replay outcomes, and responsive layout
 - [x] Draggable zoomable investigation canvas with curved animated connections
 - [x] Sequential node-only replay; stop at Policy and skip Payment on hold
 - [x] Fixed top/bottom controls and desktop/mobile interaction verification
