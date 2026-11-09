@@ -68,25 +68,25 @@
 
 .investigation-canvas {
   --xy-background-color: var(--background);
-  --xy-background-pattern-dots-color: var(--border);
-  --xy-edge-stroke: var(--muted-foreground);
-  --xy-edge-stroke-width: 2;
+  --xy-background-pattern-dots-color: var(--canvas-dot);
+  --xy-edge-stroke: var(--canvas-wire);
+  --xy-edge-stroke-width: 2.5;
   --xy-handle-background-color: var(--card);
-  --xy-handle-border-color: var(--muted-foreground);
+  --xy-handle-border-color: var(--canvas-wire);
   --xy-attribution-background-color: var(--background);
 }
 .inspection-node {
   width: 230px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--card);
   color: var(--foreground);
   cursor: grab;
 }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }
-.inspection-node .react-flow__handle { width: 8px; height: 8px; min-width: 8px; min-height: 8px; }
+.inspection-node .react-flow__handle { width: 7px; height: 7px; min-width: 7px; min-height: 7px; border-width: 2px; }
 .inspection-node .connection-target { opacity: 0; pointer-events: none; }
-.investigation-canvas .react-flow__arrowhead { fill: var(--muted-foreground); stroke: var(--muted-foreground); }
+.investigation-canvas .react-flow__arrowhead { fill: var(--canvas-wire); stroke: var(--canvas-wire); }
 .toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--primary); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--warning); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--destructive); }
@@ -126,6 +126,8 @@
   --destructive-foreground: oklch(0.165 0.005 260);
   --warning: oklch(0.83 0.16 90);
   --border: oklch(0.32 0.01 260);
+  --canvas-dot: oklch(0.26 0.006 260);
+  --canvas-wire: oklch(0.72 0.008 260);
   --input: oklch(0.32 0.01 260);
   --ring: oklch(0.79 0.17 160);
   --chart-1: oklch(0.79 0.17 160);

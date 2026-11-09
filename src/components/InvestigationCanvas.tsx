@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Background, BackgroundVariant, BaseEdge, Handle, MarkerType, Position, ReactFlow, ReactFlowProvider, getBezierPath, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
-import { ArrowUpRight, Check, CircleDashed, GripVertical, LoaderCircle, Maximize, Minus, Plus, SkipForward, AlertTriangle, X } from "lucide-react";
+import { ArrowUpRight, Check, CircleDashed, FileScan, Files, GitCompareArrows, GripVertical, LoaderCircle, Maximize, Minus, Plus, Receipt, ShieldCheck, SkipForward, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agents, type Agent } from "@/lib/mock-data";
 import { queuedInvoices } from "@/lib/prototype-state";
@@ -14,31 +14,37 @@ const labels = { pending: "Waiting", running: "Running…", success: "Successful
 
 const sidePositions = { left: Position.Left, right: Position.Right, top: Position.Top, bottom: Position.Bottom };
 const titles: Record<string, string> = { extraction: "Read invoice", matching: "Match purchase order", policy: "Check duplicates", payment: "Issue payment" };
+const stationIcons: Record<string, typeof FileScan> = { extraction: FileScan, matching: GitCompareArrows, policy: ShieldCheck, payment: Receipt };
 
 function InspectionNode({ id, data }: NodeProps<FlowNode>) {
   const Icon = icons[data.outcome];
+  const StationIcon = data.agent ? stationIcons[data.agent.id] ?? FileScan : data.kind === "queue" ? Files : Receipt;
   const updateNodeInternals = useUpdateNodeInternals();
   useEffect(() => { updateNodeInternals(id); }, [id, data.incoming, data.outgoing, updateNodeInternals]);
   return <div className={`inspection-node outcome-${data.outcome}`}>
     {data.incoming && <Handle type="target" position={sidePositions[data.incoming]} id="incoming" className="connection-target" />}
-    <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-      <span className="flex items-center gap-2 text-xs font-semibold"><GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
-      {data.agent && <Icon className={`h-4 w-4 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]}><title>{labels[data.outcome]}</title></Icon>}
+    <div className="flex h-11 items-center justify-between gap-2 px-3">
+      <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold"><GripVertical className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" /><StationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{data.agent ? titles[data.agent.id] : data.kind === "queue" ? "Invoice queue" : "Payment receipts"}</span>
+      {data.agent && <Icon className={`h-3.5 w-3.5 shrink-0 node-status ${data.outcome === "running" ? "motion-safe:animate-spin" : ""}`} aria-label={labels[data.outcome]}><title>{labels[data.outcome]}</title></Icon>}
     </div>
     {data.agent ? <>
-      <div className="flex flex-col gap-3 p-4">
-        <span className="text-[10px] uppercase text-muted-foreground">{data.agent.name}</span>
-          <span className="flex items-baseline justify-between"><span className="font-mono text-3xl">{data.agent.confidence}%</span><span className="text-[10px] font-normal text-muted-foreground">CONFIDENCE</span></span>
-          <p className="min-h-10 text-xs leading-relaxed text-muted-foreground">{data.detail}</p>
-          {data.outcome !== "success" && <span className="node-status text-xs" role="status">{labels[data.outcome]}</span>}
-          <Button variant="outline" size="sm" className={`nodrag nopan w-fit rounded-full px-3 shadow-none ${data.outcome === "warning" ? "border-warning/50 text-warning" : data.outcome === "failed" ? "border-destructive/50 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}<ArrowUpRight className="h-3.5 w-3.5" /></Button>
+      <div className="flex flex-col gap-1.5 px-2 pb-2">
+        <div className="rounded-md bg-muted/50 px-2.5 py-2">
+          <p className="mb-1 text-[10px] text-muted-foreground">{data.agent.name}</p>
+          <p className="min-h-8 text-[11px] leading-relaxed">{data.detail}</p>
+        </div>
+        <div className="flex h-7 items-center justify-between rounded-md bg-muted/50 px-2.5 text-[10px]"><span className="text-muted-foreground">Confidence</span><span className="font-mono">{data.agent.confidence}%</span></div>
+        <div className="flex h-9 items-center justify-between gap-2 px-1">
+          {data.outcome !== "success" ? <span className="node-status text-[10px]" role="status">{labels[data.outcome]}</span> : <span />}
+          <Button variant="outline" size="sm" className={`nodrag nopan h-7 w-fit rounded-full px-2.5 text-[10px] shadow-none ${data.outcome === "warning" ? "border-warning/50 text-warning" : data.outcome === "failed" ? "border-destructive/50 text-destructive" : ""}`} aria-label={`${data.agent.name}: ${data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}`} onClick={() => { if (data.agent) data.onInspect(data.agent); }}>{data.outcome === "warning" ? "Review match" : data.outcome === "failed" ? "Review hold" : "View details"}<ArrowUpRight className="h-3 w-3" /></Button>
+        </div>
       </div>
-    </> : <div className="space-y-2 p-4">
-      {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`border px-3 py-2 ${invoice.legit ? "border-primary/40 text-primary" : data.paused ? "border-warning/40 text-warning" : "border-border"}`}>
-        <p className="font-mono text-xs">{invoice.id}</p><p className="mt-1 text-[10px]">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
+    </> : <div className="space-y-1.5 px-2 pb-2">
+      {data.kind === "queue" ? queuedInvoices.map(invoice => <div key={invoice.id} className={`rounded-md bg-muted/50 px-2.5 py-2 ${invoice.legit ? "text-primary" : data.paused ? "text-warning" : "text-foreground"}`}>
+        <p className="font-mono text-[11px]">{invoice.id}</p><p className="mt-1 text-[10px] text-muted-foreground">{invoice.legit ? "Not a duplicate · Safe to release" : data.paused ? "Paused" : "Queued"}</p>
       </div>) : <>
-        <div className="border border-border px-3 py-3"><p className="font-mono text-xs">INV-4821</p><p className="mt-1 text-[10px] text-muted-foreground">Paid Oct 29 · $12,480</p></div>
-        {data.paidAgain && <div className="border border-destructive px-3 py-3 text-destructive"><p className="font-mono text-xs">INV-4821-A</p><p className="mt-1 text-[10px]">Paid again · $12,480</p></div>}
+        <div className="rounded-md bg-muted/50 px-2.5 py-2"><p className="font-mono text-[11px]">INV-4821</p><p className="mt-1 text-[10px] text-muted-foreground">Paid Oct 29 · $12,480</p></div>
+        {data.paidAgain && <div className="rounded-md bg-destructive/10 px-2.5 py-2 text-destructive"><p className="font-mono text-[11px]">INV-4821-A</p><p className="mt-1 text-[10px]">Paid again · $12,480</p></div>}
       </>}
     </div>}
     {data.outgoing && <Handle type="source" position={sidePositions[data.outgoing]} id="outgoing" />}
@@ -62,7 +68,7 @@ function StringEdge(props: EdgeProps) {
 }
 const nodeTypes = { inspection: InspectionNode };
 const edgeTypes = { string: StringEdge };
-const positions = [{ x: 0, y: 100 }, { x: 310, y: 75 }, { x: 620, y: 110 }, { x: 930, y: 80 }, { x: 1240, y: 105 }, { x: 1550, y: 85 }];
+const positions = [{ x: 0, y: 100 }, { x: 270, y: 80 }, { x: 540, y: 115 }, { x: 810, y: 85 }, { x: 1080, y: 110 }, { x: 1350, y: 90 }];
 const ids = ["queue", ...agents.map(a => a.id), "output"];
 
 function CanvasControls() {
