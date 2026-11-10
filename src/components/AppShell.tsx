@@ -13,7 +13,8 @@ const nav = [
 ] as const;
 
 export function AppShell({ children, canvas = false }: { children: ReactNode; canvas?: boolean }) {
-  const { dispatch } = usePrototype();
+  const { state, dispatch } = usePrototype();
+  const unread = state.log.filter((e) => e.id > state.lastSeenLogId).length;
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => { setCollapsed(localStorage.getItem("sidebar-collapsed") === "1"); }, []);
   const toggle = () => setCollapsed(c => { localStorage.setItem("sidebar-collapsed", c ? "0" : "1"); return !c; });
@@ -36,7 +37,8 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
             <Hint key={to} label={collapsed ? label : undefined} side="right"><Link to={to} aria-label={label}
               className={`flex items-center gap-3 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? "justify-center px-0" : "px-3"}`}
               activeProps={{ className: "bg-secondary !text-foreground" }} activeOptions={{ exact, includeSearch: false }}>
-              <Icon className="h-4 w-4 shrink-0" />{!collapsed && <span>{label}</span>}
+              <Icon className="h-4 w-4 shrink-0" />{!collapsed && <span className="flex-1">{label}</span>}
+              {!collapsed && to === "/activity" && unread > 0 && <span aria-label={`${unread} new`} className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">{unread}</span>}
             </Link></Hint>
           ))}
         </nav>

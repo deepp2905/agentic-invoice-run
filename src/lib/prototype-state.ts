@@ -22,6 +22,7 @@ export interface PrototypeState {
   heldDuplicate: boolean;
   log: LogEntry[];
   nextId: number;
+  lastSeenLogId: number;
 }
 export type PrototypeAction =
   | { type: "pause"; time: string }
@@ -29,7 +30,8 @@ export type PrototypeAction =
   | { type: "toggle"; rule: RuleId; time: string; at?: number }
   | { type: "replay"; caught: boolean; time: string; completedRunId?: string }
   | { type: "undo"; id: number; time: string }
-  | { type: "reset" };
+  | { type: "reset" }
+  | { type: "seen" };
 
 export const ruleNames: Record<RuleId, string> = {
   duplicate: "Duplicate check",
@@ -45,6 +47,7 @@ export const initialPrototypeState: PrototypeState = {
   heldDuplicate: false,
   log: [],
   nextId: 1,
+  lastSeenLogId: 0,
 };
 
 export const queuedInvoices = [
@@ -82,6 +85,7 @@ export function runStatus(runId: string, state: Pick<PrototypeState, "paused" | 
 
 export function prototypeReducer(state: PrototypeState, action: PrototypeAction): PrototypeState {
   if (action.type === "reset") return initialPrototypeState;
+  if (action.type === "seen") return state.lastSeenLogId === state.nextId - 1 ? state : { ...state, lastSeenLogId: state.nextId - 1 };
   let update: Partial<PrototypeState> = {};
   let entry: Omit<LogEntry, "id" | "time">;
   if (action.type === "pause") {
