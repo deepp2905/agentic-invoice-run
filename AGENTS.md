@@ -42,3 +42,4 @@ use the editor.
 - Render arrow markers inside each custom edge with automatic SVG orientation so arrowheads follow the actual curve tangent and share its outcome styling.
 - Shared UI atoms (Chip, Notice, InsetRow, Surface, IconButton, Avatar, Hint) live in src/components/system; pages compose them and never hardcode colors, radii or font sizes — tokens in src/styles.css are the single source.
 - Enforce one visible toast globally inside the shared Toaster wrapper so every page gets replace-not-stack behavior without per-call ids.
+- Frame replay through the pure replayViewport helper (fixed screen padding, reserved top toast band, bottom empty space, zoom cap); the run page opts into top-center toasts via body.run-toasts so the shared Toaster stays the single owner.

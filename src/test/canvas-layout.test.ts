@@ -28,3 +28,17 @@ describe("Run canvas layout", () => {
     expect([0, 0.25, 0.5, 0.75, 1].map(easeInOut)).toEqual([0, 0.125, 0.5, 0.875, 1]);
   });
 });
+import { replayViewport } from "@/lib/canvas-layout";
+describe("Replay fit", () => {
+  it("never exceeds 85% zoom", () => {
+    expect(replayViewport({ x: 0, y: 0, width: 100, height: 100 }, 2000, 2000).zoom).toBe(0.85);
+  });
+  it("keeps 32px sides and 80px empty space below the lowest node", () => {
+    const b = { x: 0, y: 0, width: 1000, height: 600 };
+    const v = replayViewport(b, 64 + 1000 * 0.6, 2000);
+    expect(v.x).toBeCloseTo(32);
+    const tall = replayViewport(b, 4000, 600 * 0.5 + 32 + 72 + 32 + 80);
+    expect(tall.zoom).toBeCloseTo(0.5);
+    expect(600 * 0.5 + 32 + 72 + 32 + 80 - (tall.y + 600 * tall.zoom)).toBeCloseTo(112);
+  });
+});

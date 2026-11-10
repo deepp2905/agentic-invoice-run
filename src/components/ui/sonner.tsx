@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster as Sonner, toast, useSonner } from "sonner";
 
 /* One toast at a time: a new toast dismisses whatever is showing. */
@@ -13,7 +13,20 @@ function SingleToast() {
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
+/* The run page opts into top-center toasts below its header by setting body.run-toasts and --run-toast-top. */
+function useRunPlacement() {
+  const [top, setTop] = useState<number | null>(null);
+  useEffect(() => {
+    const read = () => setTop(document.body.classList.contains("run-toasts") ? parseFloat(document.body.style.getPropertyValue("--run-toast-top")) || 92 : null);
+    const observer = new MutationObserver(read);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] }); read();
+    return () => observer.disconnect();
+  }, []);
+  return top;
+}
+
 const Toaster = ({ ...props }: ToasterProps) => {
+  const runTop = useRunPlacement();
   return (
     <>
     <SingleToast />
@@ -32,6 +45,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       {...props}
+      {...(runTop !== null ? { position: "top-center" as const, offset: { top: runTop }, mobileOffset: { top: runTop }, duration: 3000 } : {})}
     />
     </>
   );

@@ -112,7 +112,6 @@
 @keyframes match-border-pulse { 50% { box-shadow: var(--matching-pulse); } }
 .canvas-node-focused, .canvas-node-dimmed { transition: opacity 200ms ease; }
 .run-header { min-height: var(--run-header-height); }
-.run-toasts [data-sonner-toaster] { bottom: var(--run-toast-bottom) !important; }
 .node-actions { min-height: var(--node-actions-height); }
 .node-review, .node-tag { font-size: var(--node-text-size); }
 .node-review { min-height: var(--node-actions-height); }

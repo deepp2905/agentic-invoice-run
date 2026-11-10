@@ -49,14 +49,12 @@ function RunDetailView({ run }: { run: RunDetail }) {
     const element = footer.current;
     if (!element) return;
     document.body.classList.add("run-toasts");
-    const band = document.querySelector(".canvas-control-band");
-    const update = () => {
-      const top = band?.getBoundingClientRect().top ?? element.getBoundingClientRect().top;
-      document.body.style.setProperty("--run-toast-bottom", `${window.innerHeight - top + 24}px`);
-    };
+    const header = document.querySelector(".run-header");
+    const update = () => document.body.style.setProperty("--run-toast-top", `${(header?.getBoundingClientRect().bottom ?? 76) + 16}px`);
     const observer = new ResizeObserver(update);
-    observer.observe(element); if (band) observer.observe(band); update();
-    return () => { observer.disconnect(); document.body.classList.remove("run-toasts"); document.body.style.removeProperty("--run-toast-bottom"); };
+    observer.observe(element); if (header) observer.observe(header); update();
+    window.addEventListener("resize", update);
+    return () => { observer.disconnect(); window.removeEventListener("resize", update); document.body.classList.remove("run-toasts"); document.body.style.removeProperty("--run-toast-top"); };
   }, []);
   useEffect(() => {
     if (!replay || replay.phase === "complete") return;
@@ -65,14 +63,14 @@ function RunDetailView({ run }: { run: RunDetail }) {
       if (replay.phase === "running") {
         const name = run.agents[replay.index]?.name ?? "Agent";
         const outcome = nodeOutcome(replay.index, next);
-        if (outcome === "warning") toast.warning(`${name} needs review`, { description: next.rule === "combined" ? "62% confidence · Duplicate flagged" : "62% confidence · Handed off without a flag", duration: 2500 });
-        else if (outcome === "failed") toast.success("Duplicate caught", { description: "Held at Check duplicates · Not paid", duration: 2500 });
-        else for (const index of completionAgents(replay)) toast.success(`${run.agents[index]?.name ?? "Agent"} completed`, { duration: 2500 });
+        if (outcome === "warning") toast.warning(`${name} needs review`, { description: next.rule === "combined" ? "62% confidence · Duplicate flagged" : "62% confidence · Handed off without a flag", duration: 3000 });
+        else if (outcome === "failed") toast.success("Duplicate caught", { description: "Held at Check duplicates · Not paid", duration: 3000 });
+        else for (const index of completionAgents(replay)) toast.success(`${run.agents[index]?.name ?? "Agent"} completed`, { duration: 3000 });
       }
       if (next.phase === "complete") {
         dispatch({ type: "replay", caught: run.duplicate && next.rule === "combined", time: actionTime(), ...(!run.duplicate ? { completedRunId: run.id } : {}) });
-        if (!run.duplicate) toast.success("Run completed", { description: `${run.id} · ${run.amount} payment verified`, duration: 2500 });
-        else if (next.rule === "exact") toast.error("Run completed with a duplicate payment", { description: "$12,480 paid again · Duplicate was not caught", duration: 2500 });
+        if (!run.duplicate) toast.success("Run completed", { description: `${run.id} · ${run.amount} payment verified`, duration: 3000 });
+        else if (next.rule === "exact") toast.error("Run completed with a duplicate payment", { description: "$12,480 paid again · Duplicate was not caught", duration: 3000 });
       }
       setReplay(next);
     }, replay.phase === "running" ? 1100 : 550);
@@ -88,7 +86,7 @@ function RunDetailView({ run }: { run: RunDetail }) {
     <InvestigationCanvas run={run} replay={displayedReplay} paused={state.paused} onInspect={setSelected} />
     <footer ref={footer} className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">
       <div className="flex items-center gap-4"><h2 className="text-lg font-semibold">{run.duplicate ? "Decide" : "Run complete"}</h2><p className="text-xs text-muted-foreground">{run.duplicate ? state.paused ? "2 similar invoices paused, 1 safe to release" : "2 similar invoices queued, 1 safe to release" : `${run.po} · ${run.receipt} · ${run.date}`}</p></div>
-      {run.duplicate && <div className="flex flex-wrap gap-2"><Button variant="secondary" disabled={running} onClick={() => { if (state.paused) setSelected("pause"); else { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 2500 }); } }}>{state.paused ? <Check /> : <Pause />}{state.paused ? "Paused, 2 runs held" : "Pause similar runs"}</Button><Button variant="secondary" disabled={running} onClick={() => setSelected("rule")}><Pencil />Edit rule</Button></div>}
+      {run.duplicate && <div className="flex flex-wrap gap-2"><Button variant="secondary" disabled={running} onClick={() => { if (state.paused) setSelected("pause"); else { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 3000 }); } }}>{state.paused ? <Check /> : <Pause />}{state.paused ? "Paused, 2 runs held" : "Pause similar runs"}</Button><Button variant="secondary" disabled={running} onClick={() => setSelected("rule")}><Pencil />Edit rule</Button></div>}
     </footer>
     <InvestigationPanels run={run} panel={selected} onClose={() => setSelected(null)} />
   </AppShell>;

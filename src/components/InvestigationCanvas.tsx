@@ -11,6 +11,7 @@ import { Chip, IconButton } from "@/components/system";
 import { resolveOverlap } from "@/lib/node-collision";
 import { flowConnections, type ConnectionSide } from "@/lib/flow-connections";
 import { canvasLayout, easeInOut, elbowHandoff, type CanvasBounds } from "@/lib/canvas-layout";
+import { replayFit, replayViewport } from "@/lib/canvas-layout";
 import { placeEdgeCaption } from "@/lib/edge-caption";
 
 type FlowData = { run: RunDetail; kind: "agent" | "queue" | "output"; agent?: Agent | undefined; outcome: NodeOutcome; detail: string; paused: boolean; paidAgain: boolean; count: number; incoming?: ConnectionSide | undefined; outgoing?: ConnectionSide | undefined; onInspect: (agent: Agent) => void };
@@ -76,12 +77,14 @@ function StringEdge(props: EdgeProps) {
   // Side-to-side connectors anchor below their lowest point so the pill never crosses the curve.
   const labelY = elbow ? (sy + ty) / 2 : sny === 0 && tny === 0 ? Math.max(sy, ty) + 4 : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8;
   const nodeBounds = props.data?.['bounds'] as CanvasBounds[] | undefined;
-  const labelPosition = placeEdgeCaption({ x: labelX, y: labelY }, labelSize, nodeBounds ?? [], zoom);
+  const onLine = props.data?.['onLine'] === true;
+  const lineX = elbow ? elbow.labelX : (sx + 3 * (sx + snx * reach) + 3 * (ex + tnx * reach) + ex) / 8, lineY = elbow ? (sy + ty) / 2 : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8;
+  const labelPosition = onLine ? { x: lineX, y: lineY, compact: false } : placeEdgeCaption({ x: labelX, y: labelY }, labelSize, nodeBounds ?? [], zoom);
   return <><g className={`flow-string ${active ? "flow-string-active" : ""} ${stateClass}`}>
     <defs><marker id={markerId} viewBox="0 -5 10 10" refX="0" refY="0" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0,-5 L 10,0 L 0,5 Z" className="flow-string-arrow" /></marker></defs>
     <BaseEdge id={props.id} path={path} markerEnd={`url(#${markerId})`} />
     {active && <path d={path} className="flow-string-pulse" />}
-  </g>{typeof label === "string" && <EdgeLabelRenderer><div ref={labelElement} aria-hidden={!labelPosition || labelPosition.compact} className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ visibility: !labelPosition || labelPosition.compact ? "hidden" : "visible", transform: `translate(-50%, 0) translate(${labelPosition?.x ?? labelX}px, ${labelPosition?.y ?? labelY}px)` }}>{label}</div>{labelPosition?.compact && <div className="nodrag nopan pointer-events-auto absolute" style={{ transform: `translate(-50%, 0) translate(${labelPosition.x}px, ${labelPosition.y}px) scale(${1 / zoom})`, transformOrigin: "top center" }}><Hint label={label}><Button size="icon" variant="secondary" aria-label={label} className={`size-5 rounded-full ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-muted-foreground"}`}><span className="text-xs" aria-hidden="true">i</span></Button></Hint></div>}</EdgeLabelRenderer>}</>;
+  </g>{typeof label === "string" && <EdgeLabelRenderer><div ref={labelElement} aria-hidden={!labelPosition || labelPosition.compact} className={`flow-edge-label ${elbow ? "flow-edge-label-elbow" : ""} nodrag nopan ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-foreground"}`} style={{ visibility: !labelPosition || labelPosition.compact ? "hidden" : "visible", transform: `translate(-50%, ${onLine ? "-50%" : "0"}) translate(${labelPosition?.x ?? labelX}px, ${labelPosition?.y ?? labelY}px)` }}>{label}</div>{labelPosition?.compact && <div className="nodrag nopan pointer-events-auto absolute" style={{ transform: `translate(-50%, 0) translate(${labelPosition.x}px, ${labelPosition.y}px) scale(${1 / zoom})`, transformOrigin: "top center" }}><Hint label={label}><Button size="icon" variant="secondary" aria-label={label} className={`size-5 rounded-full ${state === "failed" ? "text-destructive" : props.data?.['warning'] ? "text-warning" : "text-muted-foreground"}`}><span className="text-xs" aria-hidden="true">i</span></Button></Hint></div>}</EdgeLabelRenderer>}</>;
 }
 const nodeTypes = { inspection: InspectionNode }, edgeTypes = { string: StringEdge };
 const ids = ["queue", "extraction", "matching", "policy", "payment", "output"];
@@ -126,6 +129,16 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     if (!element) return;
     animate(getViewportForBounds(getNodesBounds(ids), element.clientWidth, element.clientHeight, canvasLayout.minimumZoom, 1, `${canvasLayout.padding}px`), duration);
   }, [animate, getNodesBounds]);
+  const replayFrame = useCallback((paidAgain: boolean) => {
+    setFocus(null);
+    const element = container.current;
+    if (!element) return;
+    const b = getNodesBounds(ids), output = getNode("output");
+    // Reserve the tallest Payment receipts state so the red "Paid again" line never falls under the bottom bar.
+    const outputBottom = output ? output.position.y + (output.measured?.height ?? 140) + (paidAgain ? 0 : replayFit.paidAgainReserve) : 0;
+    const bounds = { ...b, height: Math.max(b.y + b.height, outputBottom) - b.y };
+    animate(replayViewport(bounds, element.clientWidth, element.clientHeight), canvasLayout.cameraDuration);
+  }, [animate, getNodesBounds, getNode]);
   const focusNode = useCallback((id: string) => {
     const node = getNode(id), element = container.current;
     if (!node || !element) return;
@@ -149,12 +162,9 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
   }, [initialized, fullFlow, focusNode, run]);
   useEffect(() => {
     if (!initialized || !replay) return;
-    if (replay.index === 0 && replay.phase === "running") fullFlow();
-    if (run.duplicate && replay.phase === "complete" && replay.rule === "combined") {
-      cancel();
-      delay.current = setTimeout(() => focusNode("policy"), 100);
-    }
-  }, [initialized, replay?.index, replay?.phase, replay?.rule, fullFlow, focusNode, cancel]);
+    if (replay.index === 0 && replay.phase === "running") replayFrame(false);
+    if (replay.phase === "complete") { cancel(); delay.current = setTimeout(() => replayFrame(hasNewReceipt(replay)), 100); }
+  }, [initialized, replay?.index, replay?.phase, replay?.rule, replayFrame, cancel]);
   const interrupt = () => { cancel(); setFocus(null); };
   const bounds = nodes.map(node => ({ ...node.position, width: node.measured?.width ?? (node.id === "matching" ? 336 : 240), height: node.measured?.height ?? 140 }));
   const connections = flowConnections(bounds);
@@ -168,10 +178,10 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
   const edges: Edge[] = ids.slice(0, -1).map((source, i) => {
     const state = !run.duplicate && !replay ? "success" : handoffOutcome(i - 1, replay);
     const label = i === 1 ? "Passed extracted fields" : i === 2 ? state === "failed" ? "Duplicate flagged" : run.duplicate ? "Handed off without a flag" : "Passed verified PO match" : i === 3 && state !== "failed" ? "Approved for payment" : undefined;
-    return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2 && run.duplicate, elbow: i === 2, bounds } };
+    return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2 && run.duplicate, elbow: i === 2, onLine: i === 1 || i === 2, bounds } };
   });
   return <div className="flex min-h-0 flex-1 flex-col"><div ref={container} className={`investigation-canvas relative min-h-0 flex-1 overflow-hidden ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
-    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} minZoom={canvasLayout.minimumZoom} maxZoom={1.8} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStart={interrupt} onNodeDragStop={(_, dragged) => setNodes(current => {
+    <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} minZoom={replayFit.minZoom} maxZoom={1.8} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStart={interrupt} onNodeDragStop={(_, dragged) => setNodes(current => {
       const size = (n: FlowNode) => ({ width: n.measured?.width ?? 240, height: n.measured?.height ?? 140 });
       const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
       const position = resolveOverlap({ ...dragged.position, ...size(dragged) }, others);

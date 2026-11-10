@@ -49,7 +49,7 @@ export function InvestigationPanels({ run, panel, onClose }: { run: RunDetail; p
           const status = queuedInvoiceState(invoice, state.paused);
           return <li key={invoice.id} className="py-4 text-sm"><div className="flex items-center justify-between gap-3"><span className="font-mono">{invoice.id}</span><span className={toneText[status === "safe" ? "success" : status === "paused" ? "warning" : "neutral"]}>{status === "safe" ? "Safe to release" : status === "paused" ? "Paused" : "Queued"}</span></div><p className="mt-2 text-muted-foreground">{invoice.vendor}</p><p className="mt-1 text-muted-foreground">{invoice.amount} · {invoice.po}</p>{invoice.legit && <Chip tone="success" className="mt-2">Not a duplicate, safe to release</Chip>}</li>;
         })}</ul>
-        <Button className="mt-6 w-full" disabled={state.paused} onClick={() => { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 2500 }); }}>{state.paused ? "2 runs paused" : "Confirm pause"}</Button>
+        <Button className="mt-6 w-full" disabled={state.paused} onClick={() => { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 3000 }); }}>{state.paused ? "2 runs paused" : "Confirm pause"}</Button>
       </>}
       {panel === "rule" && <RuleEditor onSaved={onClose} />}
     </SheetContent>
