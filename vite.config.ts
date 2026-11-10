@@ -10,6 +10,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Pre-bundle so a late discovery cannot reload deps with a second React copy.
+  vite: { optimizeDeps: { include: ["@radix-ui/react-alert-dialog"] } },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
