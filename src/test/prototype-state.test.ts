@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialPrototypeState, prototypeReducer, queuedInvoices, queuedInvoiceState, replayOutcome, runStatus } from "@/lib/prototype-state";
+import { effectiveRule, runStatus as status, initialPrototypeState, prototypeReducer, queuedInvoices, queuedInvoiceState, replayOutcome, runStatus } from "@/lib/prototype-state";
 
 describe("Finance prototype actions", () => {
   it("pauses only INV-4821-B and INV-4821-C while D remains safe", () => {
@@ -72,5 +72,29 @@ describe("Finance prototype actions", () => {
     state = prototypeReducer(state, { type: "rule", rule: "combined", time: "09:15" });
     state = prototypeReducer(state, { type: "toggle", rule: "late", time: "09:16" });
     expect(prototypeReducer(state, { type: "reset" })).toEqual(initialPrototypeState);
+  });
+  it("groups toggles of one rule within 10 seconds into one entry with the final state", () => {
+    let state = prototypeReducer(initialPrototypeState, { type: "toggle", rule: "late", time: "a", at: 0 });
+    state = prototypeReducer(state, { type: "toggle", rule: "late", time: "b", at: 9_000 });
+    expect(state.log).toHaveLength(1);
+    expect(state.log[0]?.message).toBe("You turned on Late payment alert");
+    state = prototypeReducer(state, { type: "toggle", rule: "late", time: "c", at: 20_000 });
+    expect(state.log).toHaveLength(2);
+  });
+  it("undo marks the entry undone and adds no new entry", () => {
+    const off = prototypeReducer(initialPrototypeState, { type: "toggle", rule: "duplicate", time: "a", at: 0 });
+    const undone = prototypeReducer(off, { type: "undo", id: 1, time: "b" });
+    expect(undone.log).toHaveLength(1);
+    expect(undone.log[0]?.undone).toBe(true);
+    expect(undone.ruleEnabled.duplicate).toBe(true);
+  });
+  it("replays as paid again while Duplicate check is off, and restores the saved rule when on", () => {
+    const ruled = prototypeReducer(initialPrototypeState, { type: "rule", rule: "combined", time: "a" });
+    const off = prototypeReducer(ruled, { type: "toggle", rule: "duplicate", time: "b", at: 0 });
+    expect(effectiveRule(off)).toBe("exact");
+    const on = prototypeReducer(off, { type: "toggle", rule: "duplicate", time: "c", at: 60_000 });
+    expect(effectiveRule(on)).toBe("combined");
+    const held = prototypeReducer(on, { type: "replay", caught: true, time: "d" });
+    expect(status("INV-4821-A", { ...held, ruleEnabled: { ...held.ruleEnabled, duplicate: false } })).toBe("paid-twice");
   });
 });

@@ -45,7 +45,8 @@ function RunsPage() {
   const visible = rows.filter((row) =>
     (tab === "all" || (tab === "attention" ? needsAttention(row.status) : row.status === "paused")) &&
     (!term || row.id.toLowerCase().includes(term) || row.vendor.toLowerCase().includes(term)));
-  const held = state.heldDuplicate;
+  const held = runStatus(alert.runId, state) === "held";
+  const checkOff = !state.ruleEnabled.duplicate;
   return (
     <AppShell>
       <Notice tone={held ? "success" : "destructive"} size="lg" icon={held ? CircleCheck : AlertTriangle} className="mb-10" action={<Button asChild variant={held ? "secondary" : "default"}><Link to="/runs/$runId" params={{ runId: alert.runId }}>{held ? "View run" : "Investigate"}</Link></Button>}>
@@ -54,7 +55,7 @@ function RunsPage() {
           <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor} · {alert.amount} not paid</p>
         </> : <>
           <p className="text-base font-medium">Invoice {alert.invoice} was paid twice, {alert.amount}.</p>
-          <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}</p>
+          <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}{checkOff ? " · Duplicate check is off" : ""}</p>
         </>}
       </Notice>
 
@@ -89,7 +90,7 @@ function RunsPage() {
               const investigate = r.id === "INV-4821-A" && !held;
               return (
                 <tr key={r.id} className="border-t border-border">
-                  <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate) && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}</td>
+                  <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate || r.id === "INV-4821-B" || r.id === "INV-4821-C") && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}{r.id === "INV-4821-D" && <Chip tone="success" className="mt-2 flex bg-transparent px-0">Not a duplicate</Chip>}</td>
                   <td className="px-6 py-4">{r.vendor}</td>
                   <td className="px-6 py-4">{r.amount}</td>
                   <td className="px-6 py-4"><Chip tone={meta.tone}>{meta.label}</Chip></td>

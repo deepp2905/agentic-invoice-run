@@ -10,7 +10,7 @@ describe("Run canvas layout", () => {
     expect(clearLabelPosition(350, 180, 100, 50, [node], 8 / zoom)).toEqual({ x: 350, y: 180 });
   });
   it("orders both rows left to right", () => {
-    expect(canvasLayout.positions.map(p => p.x)).toEqual([0, 350, 700, 0, 350, 700]);
+    expect(canvasLayout.positions.map(p => p.x)).toEqual([0, 350, 900, 0, 350, 700]);
     expect(canvasLayout.positions.map(p => p.y)).toEqual([0, 0, 0, 380, 380, 380]);
   });
   it("keeps minimum zoom at 70% and full-flow padding at 48px", () => {

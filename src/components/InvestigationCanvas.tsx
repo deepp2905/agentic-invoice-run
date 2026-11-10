@@ -73,7 +73,8 @@ function StringEdge(props: EdgeProps) {
   const stateClass = state === "success" ? "flow-string-success" : state === "warning" ? "flow-string-warning" : state === "failed" ? "flow-string-failed" : "";
   const markerId = `curve-arrow-${props.id}`, label = props.data?.['label'];
   const labelX = elbow?.labelX ?? (sx + 3 * (sx + snx * reach) + 3 * (ex + tnx * reach) + ex) / 8;
-  const labelY = elbow ? (sy + ty) / 2 : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8;
+  // Side-to-side connectors anchor below their lowest point so the pill never crosses the curve.
+  const labelY = elbow ? (sy + ty) / 2 : sny === 0 && tny === 0 ? Math.max(sy, ty) + 4 : (sy + 3 * (sy + sny * reach) + 3 * (ey + tny * reach) + ey) / 8;
   const nodeBounds = props.data?.['bounds'] as CanvasBounds[] | undefined;
   const labelPosition = placeEdgeCaption({ x: labelX, y: labelY }, labelSize, nodeBounds ?? [], zoom);
   return <><g className={`flow-string ${active ? "flow-string-active" : ""} ${stateClass}`}>

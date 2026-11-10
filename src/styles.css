@@ -120,7 +120,7 @@
 .confidence-meter { height: var(--confidence-meter-height); background: var(--secondary); border-radius: var(--radius-sm); overflow: hidden; }
 .confidence-meter-fill { width: 62%; height: 100%; background: var(--warning); }
 .outcome-skipped { background: var(--muted-surface); border-color: var(--border); color: var(--muted-foreground); }
-.flow-edge-label { position: absolute; width: var(--edge-label-width); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
+.flow-edge-label { position: absolute; width: auto; white-space: nowrap; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--edge-label-padding); font-size: var(--edge-label-size); line-height: var(--node-line-height); text-align: center; pointer-events: none; }
 .flow-edge-label-elbow { width: auto; white-space: nowrap; }
 .flow-edge-label-vertical { max-width: var(--edge-label-vertical-width); }
 .react-flow__node.dragging .inspection-node { cursor: grabbing; }

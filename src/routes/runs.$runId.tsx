@@ -8,6 +8,7 @@ import { InvestigationPanels, type InvestigationPanel } from "@/components/Inves
 import { InvestigationCanvas } from "@/components/InvestigationCanvas";
 import { advanceReplay, completionAgents, savedRuleView, startSavedReplay, type ReplayFlow } from "@/lib/replay-flow";
 import { nodeOutcome } from "@/lib/replay-flow";
+import { effectiveRule } from "@/lib/prototype-state";
 import { getRunDetail, type RunDetail } from "@/lib/mock-runs";
 import { toast } from "sonner";
 
@@ -41,7 +42,7 @@ function RunDetailView({ run }: { run: RunDetail }) {
   const [selected, setSelected] = useState<InvestigationPanel>(null);
   const [replay, setReplay] = useState<ReplayFlow | null>(null);
   const running = replay !== null && replay.phase !== "complete";
-  const displayedReplay = running || !run.duplicate ? replay : savedRuleView(replay, state.rule);
+  const displayedReplay = running || !run.duplicate ? replay : savedRuleView(replay, effectiveRule(state));
   const caught = run.duplicate && displayedReplay?.rule === "combined";
   const footer = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -51,7 +52,7 @@ function RunDetailView({ run }: { run: RunDetail }) {
     const band = document.querySelector(".canvas-control-band");
     const update = () => {
       const top = band?.getBoundingClientRect().top ?? element.getBoundingClientRect().top;
-      document.body.style.setProperty("--run-toast-bottom", `${window.innerHeight - top + 16}px`);
+      document.body.style.setProperty("--run-toast-bottom", `${window.innerHeight - top + 24}px`);
     };
     const observer = new ResizeObserver(update);
     observer.observe(element); if (band) observer.observe(band); update();
@@ -81,8 +82,8 @@ function RunDetailView({ run }: { run: RunDetail }) {
     <header className="run-header flex shrink-0 flex-wrap items-center gap-4 border-b border-border bg-background px-6 py-3 max-sm:px-4" aria-label={`Run ${runId}`}>
       <Link to="/" aria-label="Back to Runs" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /></Link>
       <div><h1 className="text-xl font-semibold">{run.duplicate ? `${run.amount} paid twice` : `${run.amount} paid`}</h1><p className="text-xs text-muted-foreground">{run.id} · {run.vendor}</p></div>
-      <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : "Paid again, duplicate was not caught"}</p>
-        <Button disabled={running} onClick={() => { setSelected(null); toast.dismiss(); setReplay(startSavedReplay(getCurrentState(), run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
+      <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : !state.ruleEnabled.duplicate ? "Paid again · Duplicate check is off" : "Paid again, duplicate was not caught"}</p>
+        <Button disabled={running} onClick={() => { setSelected(null); toast.dismiss(); setReplay(startSavedReplay({ rule: effectiveRule(getCurrentState()) }, run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
     </header>
     <InvestigationCanvas run={run} replay={displayedReplay} paused={state.paused} onInspect={setSelected} />
     <footer ref={footer} className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">

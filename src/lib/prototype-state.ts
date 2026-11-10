@@ -10,6 +10,9 @@ export interface LogEntry {
   time: string;
   previousRule?: DuplicateRule;
   ruleId?: RuleId;
+  previousEnabled?: boolean;
+  affects?: string;
+  at?: number;
   undone?: boolean;
 }
 export interface PrototypeState {
@@ -23,7 +26,7 @@ export interface PrototypeState {
 export type PrototypeAction =
   | { type: "pause"; time: string }
   | { type: "rule"; rule: DuplicateRule; time: string }
-  | { type: "toggle"; rule: RuleId; time: string }
+  | { type: "toggle"; rule: RuleId; time: string; at?: number }
   | { type: "replay"; caught: boolean; time: string; completedRunId?: string }
   | { type: "undo"; id: number; time: string }
   | { type: "reset" };
@@ -65,8 +68,13 @@ export const runStatusMeta: Record<RunStatus, { label: string; tone: "destructiv
   queued: { label: "Queued", tone: "neutral" },
   ok: { label: "OK", tone: "neutral" },
 };
-export function runStatus(runId: string, state: Pick<PrototypeState, "paused" | "heldDuplicate">): RunStatus {
-  if (runId === "INV-4821-A") return state.heldDuplicate ? "held" : "paid-twice";
+/** The rule replay actually applies: a switched-off duplicate check protects nothing. */
+export function effectiveRule(state: Pick<PrototypeState, "rule"> & { ruleEnabled?: Record<RuleId, boolean> }): DuplicateRule {
+  return state.ruleEnabled && !state.ruleEnabled.duplicate ? "exact" : state.rule;
+}
+export const toggleGroupWindowMs = 10_000;
+export function runStatus(runId: string, state: Pick<PrototypeState, "paused" | "heldDuplicate"> & { ruleEnabled?: Record<RuleId, boolean> }): RunStatus {
+  if (runId === "INV-4821-A") return state.heldDuplicate && state.ruleEnabled?.duplicate !== false ? "held" : "paid-twice";
   const invoice = queuedInvoices.find((item) => item.id === runId);
   if (invoice) return invoice.legit ? "safe" : state.paused ? "paused" : "queued";
   return "ok";
@@ -79,31 +87,42 @@ export function prototypeReducer(state: PrototypeState, action: PrototypeAction)
   if (action.type === "pause") {
     if (state.paused) return state;
     update = { paused: true };
-    entry = { kind: "pause", category: "runs", message: "Finance lead paused 2 queued runs" };
+    entry = { kind: "pause", category: "runs", message: "You paused 2 queued runs", affects: "2 runs held" };
   } else if (action.type === "rule") {
     if (state.rule === action.rule) return state;
     // Restoring the old rule must be an explicit, recorded Activity undo.
     if (state.rule === "combined" && action.rule === "exact") return state;
     update = { rule: action.rule };
-    entry = { kind: "rule", category: "rules", message: "Finance lead changed duplicate rule", previousRule: state.rule };
+    entry = { kind: "rule", category: "rules", message: "You changed duplicate rule to vendor + amount + PO", previousRule: state.rule, affects: "Affects future runs" };
   } else if (action.type === "toggle") {
     const enabled = !state.ruleEnabled[action.rule];
-    update = { ruleEnabled: { ...state.ruleEnabled, [action.rule]: enabled } };
-    entry = { kind: "toggle", category: "rules", ruleId: action.rule, message: `Finance lead turned ${enabled ? "on" : "off"} ${ruleNames[action.rule]}` };
+    const ruleEnabled = { ...state.ruleEnabled, [action.rule]: enabled };
+    const message = `You turned ${enabled ? "on" : "off"} ${ruleNames[action.rule]}`;
+    const affects = action.rule === "duplicate" && !enabled ? "Affects future runs · Duplicates not blocked" : "Affects future runs";
+    const last = state.log[0];
+    // Rapid flips of one rule collapse into a single entry showing the final state.
+    if (last && last.kind === "toggle" && last.ruleId === action.rule && !last.undone && action.at !== undefined && last.at !== undefined && action.at - last.at <= toggleGroupWindowMs) {
+      return { ...state, ruleEnabled, log: [{ ...last, message, affects, time: action.time, at: action.at }, ...state.log.slice(1)] };
+    }
+    update = { ruleEnabled };
+    entry = { kind: "toggle", category: "rules", ruleId: action.rule, previousEnabled: state.ruleEnabled[action.rule], message, affects, at: action.at };
   } else if (action.type === "replay") {
     if (action.caught) update = { heldDuplicate: true };
-    entry = { kind: "replay", category: "runs", message: action.completedRunId ? `Replay completed for ${action.completedRunId}, payment verified` : action.caught ? "Replay completed, duplicate caught" : "Replay completed, invoice paid again" };
+    entry = { kind: "replay", category: "runs", message: action.completedRunId ? `Replay completed for ${action.completedRunId}, payment verified` : action.caught ? "Replay completed, duplicate caught" : "Replay completed, invoice paid again", affects: action.completedRunId ? `${action.completedRunId} verified` : action.caught ? "INV-4821-A held, not paid" : "INV-4821-A paid again" };
   } else {
     const target = state.log.find((item) => item.id === action.id);
-    if (!target || target.undone || (target.kind !== "pause" && target.kind !== "rule" && target.kind !== "toggle")) return state;
+    if (!target || target.undone || !isUndoable(target)) return state;
     // Undo the most recent active change of each kind, preserving a reversible history.
     const latest = state.log.find((item) => item.kind === target.kind && !item.undone && (target.kind !== "toggle" || item.ruleId === target.ruleId));
     if (latest?.id !== target.id) return state;
     if (target.kind === "pause") update = { paused: false };
     else if (target.kind === "rule") update = { rule: target.previousRule ?? "exact", heldDuplicate: false };
-    else if (target.ruleId) update = { ruleEnabled: { ...state.ruleEnabled, [target.ruleId]: !state.ruleEnabled[target.ruleId] } };
-    update.log = state.log.map((item) => item.id === target.id ? { ...item, undone: true } : item);
-    entry = { kind: "undo", category: target.category, message: target.kind === "pause" ? "Finance lead resumed 2 queued runs" : target.kind === "rule" ? "Finance lead restored duplicate rule" : `Finance lead restored ${ruleNames[target.ruleId ?? "duplicate"]}` };
+    else if (target.ruleId) update = { ruleEnabled: { ...state.ruleEnabled, [target.ruleId]: target.previousEnabled ?? !state.ruleEnabled[target.ruleId] } };
+    // Undo marks the original entry instead of adding a new one.
+    return { ...state, ...update, log: state.log.map((item) => item.id === target.id ? { ...item, undone: true } : item) };
   }
-  return { ...state, ...update, nextId: state.nextId + 1, log: [{ ...entry, id: state.nextId, time: action.time }, ...(update.log ?? state.log)] };
+  return { ...state, ...update, nextId: state.nextId + 1, log: [{ ...entry, id: state.nextId, time: action.time }, ...state.log] };
+}
+export function isUndoable(entry: LogEntry) {
+  return entry.kind === "pause" || entry.kind === "rule" || entry.kind === "toggle";
 }

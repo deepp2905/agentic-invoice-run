@@ -41,3 +41,4 @@ use the editor.
 - Jointly derive distinct incoming/outgoing edge centers from neighboring node bounds through a pure geometry helper; keep stable handle IDs so dragging preserves coherent ordered flow without overlapping ports.
 - Render arrow markers inside each custom edge with automatic SVG orientation so arrowheads follow the actual curve tangent and share its outcome styling.
 - Shared UI atoms (Chip, Notice, InsetRow, Surface, IconButton, Avatar, Hint) live in src/components/system; pages compose them and never hardcode colors, radii or font sizes — tokens in src/styles.css are the single source.
+- Enforce one visible toast globally inside the shared Toaster wrapper so every page gets replace-not-stack behavior without per-call ids.

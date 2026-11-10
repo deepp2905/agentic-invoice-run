@@ -5,7 +5,7 @@ import { IconArrowBackUp as Undo2, IconHistory as History, IconPencil as Pencil,
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";
-import type { ActionKind, LogCategory } from "@/lib/prototype-state";
+import { isUndoable, type ActionKind, type LogCategory } from "@/lib/prototype-state";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({ meta: [
@@ -43,13 +43,13 @@ function ActivityPage() {
     {entries.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No changes yet.</div> :
       <ol className="divide-y divide-border border-y border-border">{entries.map((entry) => {
         const Icon = kindIcon[entry.kind];
-        const undoable = (entry.kind === "pause" || entry.kind === "rule" || entry.kind === "toggle") && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone && (entry.kind !== "toggle" || item.ruleId === entry.ruleId))?.id === entry.id;
+        const undoable = isUndoable(entry) && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone && (entry.kind !== "toggle" || item.ruleId === entry.ruleId))?.id === entry.id;
         return <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
           <div className="flex items-start gap-3">
             <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" />
-            <div><p className="font-medium">{entry.message}</p><p className="mt-1 text-sm text-muted-foreground"><time>{entry.time}</time> · Finance lead{entry.undone ? " · Undone" : ""}</p></div>
+            <div><p className={`font-medium ${entry.undone ? "text-muted-foreground line-through" : ""}`}>{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<p className="mt-1 text-sm text-muted-foreground"><time>{entry.time}</time> · You</p></div>
           </div>
-          {undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => dispatch({ type: "undo", id: entry.id, time: actionTime() })}><Undo2 />Undo</Button>}
+          {entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => dispatch({ type: "undo", id: entry.id, time: actionTime() })}><Undo2 />Undo</Button>}
         </li>;
       })}</ol>}
   </AppShell>;

@@ -1,10 +1,26 @@
-import { Toaster as Sonner } from "sonner";
+import { useEffect } from "react";
+import { Toaster as Sonner, toast, useSonner } from "sonner";
+
+/* One toast at a time: a new toast dismisses whatever is showing. */
+function SingleToast() {
+  const { toasts } = useSonner();
+  useEffect(() => {
+    const live = toasts.filter((item) => !item.delete);
+    live.slice(1).forEach((item) => toast.dismiss(item.id));
+  }, [toasts]);
+  return null;
+}
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
+    <>
+    <SingleToast />
     <Sonner
+      visibleToasts={1}
+      offset={24}
+      mobileOffset={24}
       className="toaster group"
       toastOptions={{
         classNames: {
@@ -17,6 +33,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       {...props}
     />
+    </>
   );
 };
 

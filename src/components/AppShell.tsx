@@ -47,7 +47,7 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
           </button></Hint>
           <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : "px-2"}`}>
             <Avatar name="Neha Hiremath" label={collapsed ? "Neha Hiremath" : undefined} />
-            {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
+            {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">Finance lead</p></div>}
           </div>
         </div>
       </aside>

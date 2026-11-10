@@ -1,5 +1,5 @@
 export const canvasLayout = {
-  positions: [{ x: 0, y: 0 }, { x: 350, y: 0 }, { x: 700, y: 0 }, { x: 0, y: 380 }, { x: 350, y: 380 }, { x: 700, y: 380 }],
+  positions: [{ x: 0, y: 0 }, { x: 350, y: 0 }, { x: 900, y: 0 }, { x: 0, y: 380 }, { x: 350, y: 380 }, { x: 700, y: 380 }],
   minimumZoom: 0.7,
   padding: 48,
   focusZoom: 1,
