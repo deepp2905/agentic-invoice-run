@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory as History, IconLayoutSidebarLeftCollapse as PanelLeftClose, IconLayoutSidebarLeftExpand as PanelLeftOpen } from "@tabler/icons-react";
+import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory as History, IconLayoutSidebarLeftCollapse as PanelLeftClose, IconLayoutSidebarLeftExpand as PanelLeftOpen, IconRestore as Restore } from "@tabler/icons-react";
 import { Hint } from "@/components/Hint";
 import { Avatar } from "@/components/system";
+import { usePrototype } from "@/components/PrototypeProvider";
 import { useEffect, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 
 const nav = [
   { to: "/", label: "Runs", icon: Activity, exact: true },
@@ -11,6 +13,7 @@ const nav = [
 ] as const;
 
 export function AppShell({ children, canvas = false }: { children: ReactNode; canvas?: boolean }) {
+  const { dispatch } = usePrototype();
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => { setCollapsed(localStorage.getItem("sidebar-collapsed") === "1"); }, []);
   const toggle = () => setCollapsed(c => { localStorage.setItem("sidebar-collapsed", c ? "0" : "1"); return !c; });
@@ -37,9 +40,15 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
             </Link></Hint>
           ))}
         </nav>
-        <div className={`mt-auto flex items-center gap-3 border-t border-border pt-4 ${collapsed ? "justify-center" : "px-2"}`}>
-          <Avatar name="Neha Hiremath" label={collapsed ? "Neha Hiremath" : undefined} />
-          {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
+        <div className={`mt-auto flex flex-col gap-2 border-t border-border pt-4 ${collapsed ? "items-center" : ""}`}>
+          <Hint label={collapsed ? "Reset demo" : undefined} side="right"><button onClick={() => { dispatch({ type: "reset" }); toast.success("Demo data reset", { duration: 2500 }); }} aria-label="Reset demo"
+            className={`flex items-center gap-3 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? "justify-center px-2" : "px-3"}`}>
+            <Restore className="h-4 w-4 shrink-0" />{!collapsed && <span>Reset demo</span>}
+          </button></Hint>
+          <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : "px-2"}`}>
+            <Avatar name="Neha Hiremath" label={collapsed ? "Neha Hiremath" : undefined} />
+            {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">neha@harborfinance.co</p></div>}
+          </div>
         </div>
       </aside>
       <main className={canvas ? "flex min-h-0 min-w-0 flex-1 flex-col" : "min-w-0 flex-1 px-6 py-10 lg:px-12 max-sm:px-4"}>{children}</main>

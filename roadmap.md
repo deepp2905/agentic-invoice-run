@@ -1,4 +1,5 @@
 # Prototype additions
+- [x] Functional Runs (8 rows, tabs, search, live statuses), Rules (4 rules, toggles, editor + versions), Activity (filters, undo), sidebar Reset demo — verify cross-page state
 - [x] Keep arrow captions anchored near their connector, using compact tooltips when full captions cannot fit
 - [x] Replace the brief-only README with project setup and architecture documentation
 - [ ] Push to main — blocked: sync branch and pushing are managed in Lovable’s Git settings

@@ -81,7 +81,7 @@ function RunDetailView({ run }: { run: RunDetail }) {
     <header className="run-header flex shrink-0 flex-wrap items-center gap-4 border-b border-border bg-background px-6 py-3 max-sm:px-4" aria-label={`Run ${runId}`}>
       <Link to="/" aria-label="Back to Runs" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /></Link>
       <div><h1 className="text-xl font-semibold">{run.duplicate ? `${run.amount} paid twice` : `${run.amount} paid`}</h1><p className="text-xs text-muted-foreground">{run.id} · {run.vendor}</p></div>
-      <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · Payment confirmed" : caught ? "Duplicate caught · Held at Check duplicates" : "Paid again, duplicate was not caught"}</p>
+      <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : "Paid again, duplicate was not caught"}</p>
         <Button disabled={running} onClick={() => { setSelected(null); toast.dismiss(); setReplay(startSavedReplay(getCurrentState(), run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
     </header>
     <InvestigationCanvas run={run} replay={displayedReplay} paused={state.paused} onInspect={setSelected} />

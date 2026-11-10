@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
 import { Chip, Field, Notice, SectionLabel, toneText } from "@/components/system";
 import { IconAlertTriangle as AlertTriangle } from "@tabler/icons-react";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
+import { RuleEditor } from "@/components/RuleEditor";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { queuedInvoices, queuedInvoiceState, type DuplicateRule } from "@/lib/prototype-state";
+import { queuedInvoices, queuedInvoiceState } from "@/lib/prototype-state";
 import { toast } from "sonner";
 import type { Agent } from "@/lib/mock-data";
 import type { RunDetail } from "@/lib/mock-runs";
@@ -12,8 +12,6 @@ import type { RunDetail } from "@/lib/mock-runs";
 export type InvestigationPanel = Agent | "pause" | "rule" | null;
 export function InvestigationPanels({ run, panel, onClose }: { run: RunDetail; panel: InvestigationPanel; onClose: () => void }) {
   const { state, dispatch } = usePrototype();
-  const [draft, setDraft] = useState<DuplicateRule>(state.rule);
-  useEffect(() => { if (panel === "rule") setDraft(state.rule); }, [panel, state.rule]);
   const agent = typeof panel === "object" ? panel : null;
   return <Sheet open={panel !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
     <SheetContent className="w-full overflow-y-auto bg-card p-8 sm:max-w-md">
@@ -53,16 +51,7 @@ export function InvestigationPanels({ run, panel, onClose }: { run: RunDetail; p
         })}</ul>
         <Button className="mt-6 w-full" disabled={state.paused} onClick={() => { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 2500 }); }}>{state.paused ? "2 runs paused" : "Confirm pause"}</Button>
       </>}
-      {panel === "rule" && <>
-        <fieldset className="mt-8 space-y-4"><legend className="mb-4 text-sm font-medium">Match duplicates by</legend>
-          {([{ value: "exact", label: "Exact invoice number" }, { value: "combined", label: "Vendor + amount + PO" }] as const).map((option) => <label key={option.value} className="flex cursor-pointer items-center gap-3 rounded-md border border-border p-4 text-sm"><input type="radio" name="duplicate-rule" value={option.value} disabled={state.rule === "combined" && option.value === "exact"} checked={draft === option.value} onChange={() => setDraft(option.value)} className="accent-primary" />{option.label}</label>)}
-        </fieldset>
-        {state.rule === "combined" && <p className="mt-3 text-sm text-muted-foreground">Restore the previous rule with Undo in Activity.</p>}
-        <Notice role="status" tone={draft === "combined" ? "success" : "warning"} className="mt-4">
-          {draft === "combined" ? "Tested on the last 30 days: would hold 2 duplicates, would not hold 1 legitimate invoice, 0 false flags." : "Would hold 0 of the 2 duplicates."}
-        </Notice>
-        <Button className="mt-6 w-full" disabled={draft === state.rule} onClick={() => { dispatch({ type: "rule", rule: draft, time: actionTime() }); onClose(); }}>Save</Button>
-      </>}
+      {panel === "rule" && <RuleEditor onSaved={onClose} />}
     </SheetContent>
   </Sheet>;
 }

@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Chip, Notice, PageTitle, Surface } from "@/components/system";
-import { IconAlertTriangle as AlertTriangle, IconArrowRight as ArrowRight } from "@tabler/icons-react";
+import { IconAlertTriangle as AlertTriangle, IconArrowRight as ArrowRight, IconCircleCheck as CircleCheck, IconSearch as Search } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { alert, runs } from "@/lib/mock-data";
+import { runStatus, runStatusMeta } from "@/lib/prototype-state";
+import { usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,43 +23,89 @@ export const Route = createFileRoute("/")({
   component: RunsPage,
 });
 
+type Tab = "all" | "attention" | "paused";
+const tabs: { id: Tab; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "attention", label: "Needs attention" },
+  { id: "paused", label: "Paused" },
+];
+
 function RunsPage() {
+  const { state } = usePrototype();
+  const [tab, setTab] = useState<Tab>("all");
+  const [query, setQuery] = useState("");
+  const rows = runs.map((run) => ({ ...run, status: runStatus(run.id, state) }));
+  const needsAttention = (status: (typeof rows)[number]["status"]) => status === "paid-twice" || status === "paused";
+  const counts: Record<Tab, number> = {
+    all: rows.length,
+    attention: rows.filter((row) => needsAttention(row.status)).length,
+    paused: rows.filter((row) => row.status === "paused").length,
+  };
+  const term = query.trim().toLowerCase();
+  const visible = rows.filter((row) =>
+    (tab === "all" || (tab === "attention" ? needsAttention(row.status) : row.status === "paused")) &&
+    (!term || row.id.toLowerCase().includes(term) || row.vendor.toLowerCase().includes(term)));
+  const held = state.heldDuplicate;
   return (
     <AppShell>
-      <Notice tone="destructive" size="lg" icon={AlertTriangle} className="mb-10" action={<Button asChild><Link to="/runs/$runId" params={{ runId: alert.runId }}>Investigate</Link></Button>}>
-        <p className="text-base font-medium">Invoice {alert.invoice} was paid twice, {alert.amount}.</p>
-        <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}</p>
+      <Notice tone={held ? "success" : "destructive"} size="lg" icon={held ? CircleCheck : AlertTriangle} className="mb-10" action={<Button asChild variant={held ? "secondary" : "default"}><Link to="/runs/$runId" params={{ runId: alert.runId }}>{held ? "View run" : "Investigate"}</Link></Button>}>
+        {held ? <>
+          <p className="text-base font-medium">Invoice {alert.invoice} duplicate caught, payment held.</p>
+          <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor} · {alert.amount} not paid</p>
+        </> : <>
+          <p className="text-base font-medium">Invoice {alert.invoice} was paid twice, {alert.amount}.</p>
+          <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}</p>
+        </>}
       </Notice>
 
       <PageTitle>Runs</PageTitle>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="flex gap-2" role="tablist" aria-label="Filter runs">
+          {tabs.map((item) => (
+            <button key={item.id} role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)}
+              className={`rounded-sm px-3 py-1.5 text-sm transition-colors ${tab === item.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              {item.label} <span className="ml-1 text-xs text-muted-foreground">{counts[item.id]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="relative ml-auto">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search invoice or vendor" aria-label="Search runs" className="w-64 pl-9" />
+        </div>
+      </div>
       <Surface className="overflow-x-auto bg-transparent">
         <table className="w-full text-sm">
           <thead className="bg-card text-left text-muted-foreground">
             <tr>
-              {["Run", "Vendor", "Amount", "Status", "Date"].map((h) => (
+              {["Run", "Vendor", "Amount", "Status", "Time"].map((h) => (
                 <th key={h} className="px-6 py-4 font-medium">{h}</th>
               ))}
               <th className="px-6 py-4 text-right font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
-            {runs.map((r) => (
-              <tr key={r.id} className="border-t border-border">
-                <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || r.id === "INV-4821-A") && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}</td>
-                <td className="px-6 py-4">{r.vendor}</td>
-                <td className="px-6 py-4">{r.amount}</td>
-                <td className="px-6 py-4 text-muted-foreground">{r.status}</td>
-                <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
-                <td className="px-6 py-4 text-right">
-                  <Button asChild size="sm" className="w-32 justify-between" variant={r.id.startsWith("INV-4821") ? "warning" : "secondary"}>
-                    <Link to="/runs/$runId" params={{ runId: r.id }}>
-                      {r.id.startsWith("INV-4821") ? "Investigate" : "View run"}
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {visible.map((r) => {
+              const meta = runStatusMeta[r.status];
+              const investigate = r.id === "INV-4821-A" && !held;
+              return (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate) && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}</td>
+                  <td className="px-6 py-4">{r.vendor}</td>
+                  <td className="px-6 py-4">{r.amount}</td>
+                  <td className="px-6 py-4"><Chip tone={meta.tone}>{meta.label}</Chip></td>
+                  <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
+                  <td className="px-6 py-4 text-right">
+                    <Button asChild size="sm" className="w-32 justify-between" variant={investigate ? "warning" : "secondary"}>
+                      <Link to="/runs/$runId" params={{ runId: r.id }}>
+                        {investigate ? "Investigate" : "View run"}
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+            {visible.length === 0 && <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">No runs match this filter.</td></tr>}
           </tbody>
         </table>
       </Surface>

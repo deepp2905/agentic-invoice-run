@@ -20,17 +20,22 @@ export const alert = {
 };
 
 export const runs = [
-  { id: "INV-4821-A", vendor: "Harbor Office Supply", amount: "$12,480", status: "Paid", date: "Nov 7, 2026 09:14" },
-  { id: "INV-4821", vendor: "Harbor Office Supply", amount: "$12,480", status: "Paid", date: "Oct 29, 2026 15:02" },
-  { id: "INV-4790", vendor: "Northline Logistics", amount: "$3,215", status: "Paid", date: "Oct 27, 2026 11:40" },
-  { id: "INV-4766", vendor: "Cedar Facilities", amount: "$7,900", status: "Paid", date: "Oct 24, 2026 08:22" },
+  { id: "INV-4821-A", vendor: "Harbor Office Supply", amount: "$12,480", date: "Nov 7, 2026 09:14" },
+  { id: "INV-4821-B", vendor: "Harbor Office Supply", amount: "$12,480", date: "Queued" },
+  { id: "INV-4821-C", vendor: "Harbor Office Supply", amount: "$12,480", date: "Queued" },
+  { id: "INV-4821-D", vendor: "Harbor Office Supply", amount: "$3,150", date: "Queued" },
+  { id: "INV-4821", vendor: "Harbor Office Supply", amount: "$12,480", date: "Oct 29, 2026 15:02" },
+  { id: "INV-4790", vendor: "Northline Logistics", amount: "$3,215", date: "Oct 27, 2026 11:40" },
+  { id: "INV-4766", vendor: "Cedar Facilities", amount: "$7,900", date: "Oct 24, 2026 08:22" },
+  { id: "INV-4741", vendor: "Summit Packaging", amount: "$1,940", date: "Oct 21, 2026 10:05" },
 ];
 
 export const rules = [
-  { name: "Duplicate invoice check", detail: "Blocks payment when the invoice number exactly matches a previously paid invoice." },
-  { name: "PO match required", detail: "Every invoice must match an open purchase order before payment." },
-  { name: "Approval threshold", detail: "Invoices above $10,000 require a prepared approval record." },
-];
+  { id: "duplicate", name: "Duplicate check", detail: "Blocks payment when the invoice number exactly matches a previously paid invoice.", lastChanged: "Oct 2, 2026", usedIn: 12 },
+  { id: "confidence", name: "Match confidence threshold", detail: "Flags invoices when the PO match confidence falls below 80%.", lastChanged: "Sep 18, 2026", usedIn: 12 },
+  { id: "limit", name: "Vendor approval limit", detail: "Requires a prepared approval record for invoices above $10,000.", lastChanged: "Oct 9, 2026", usedIn: 12 },
+  { id: "late", name: "Late payment alert", detail: "Alerts the finance lead when an invoice passes its due date unpaid.", lastChanged: "Aug 30, 2026", usedIn: 12 },
+] as const;
 
 export const agents: Agent[] = [
   {

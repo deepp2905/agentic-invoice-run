@@ -18,6 +18,10 @@ const completedRecords = [
   { id: "INV-4821", po: "PO-7710", receipt: "PAY-10291", confidence: [98, 97, 99, 98], purchase: "Office supplies", approval: "Finance lead approval recorded" },
   { id: "INV-4790", po: "PO-7684", receipt: "PAY-10264", confidence: [99, 98, 99, 99], purchase: "Freight services", approval: "Within standard payment approval limit" },
   { id: "INV-4766", po: "PO-7649", receipt: "PAY-10231", confidence: [97, 96, 99, 98], purchase: "Facilities maintenance", approval: "Within standard payment approval limit" },
+  { id: "INV-4741", po: "PO-7601", receipt: "PAY-10187", confidence: [98, 98, 99, 97], purchase: "Packaging materials", approval: "Within standard payment approval limit" },
+  { id: "INV-4821-B", po: "PO-7710", receipt: "PAY-10305", confidence: [97, 95, 98, 97], purchase: "Office supplies", approval: "Finance lead approval recorded" },
+  { id: "INV-4821-C", po: "PO-7710", receipt: "PAY-10312", confidence: [96, 94, 98, 96], purchase: "Office supplies", approval: "Finance lead approval recorded" },
+  { id: "INV-4821-D", po: "PO-7742", receipt: "PAY-10320", confidence: [98, 97, 99, 98], purchase: "Office supplies", approval: "Within standard payment approval limit" },
 ];
 
 function completedAgents(run: (typeof runs)[number], record: (typeof completedRecords)[number]): Agent[] {
