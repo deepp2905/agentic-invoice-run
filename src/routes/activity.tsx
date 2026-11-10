@@ -5,7 +5,6 @@ import { activityHistory, type ActivityActor } from "@/lib/mock-activity";
 import { IconArrowBackUp as Undo2, IconHistory as History, IconRobot as Robot } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
-import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { isUndoable, ruleNames, type LogCategory, type LogEntry } from "@/lib/prototype-state";
 
@@ -47,14 +46,13 @@ function ActivityRow({ actor, message, affects, time, isYou, struck, action }: {
   return <li className="flex items-center gap-4 py-4">
     <ActorMark actor={actor} />
     <div className="min-w-0 flex-1">
-      <p className={`truncate font-medium ${struck ? "text-muted-foreground line-through" : ""}`}>{message}</p>
+      <div className="flex min-w-0 items-center gap-3"><p className={`truncate font-medium ${struck ? "text-muted-foreground line-through" : ""}`}>{message}</p>{action}</div>
       {affects && <p className="mt-0.5 truncate text-sm text-muted-foreground">{affects}</p>}
     </div>
     <div className="w-44 shrink-0 text-right text-sm">
       <p className="truncate text-foreground/80">{isYou ? "You" : actor.name}</p>
       <time className="mt-0.5 block text-muted-foreground">{time}</time>
     </div>
-    <div className="flex w-24 shrink-0 justify-end">{action}</div>
   </li>;
 }
 
@@ -80,7 +78,7 @@ function ActivityPage() {
       <ol className="divide-y divide-border border-y border-border">{entries.map((entry) => {
         const undoable = isUndoable(entry) && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone && (entry.kind !== "toggle" || item.ruleId === entry.ruleId))?.id === entry.id;
         return <ActivityRow key={entry.id} actor={you} isYou message={entry.message} affects={entry.affects} time={entry.time} struck={!!entry.undone}
-          action={entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => setPending(entry)}><Undo2 />Undo</Button>} />;
+          action={entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <button aria-label={`Undo: ${entry.message}`} onClick={() => setPending(entry)} className="inline-flex shrink-0 items-center gap-1 rounded-sm text-sm font-medium text-warning hover:underline"><Undo2 className="size-4" />Undo</button>} />;
       })}{history.map((entry) => <ActivityRow key={entry.id} actor={entry.actor} message={entry.message} affects={entry.affects} time={entry.time} />)}</ol>}
     <AlertDialog open={pending !== null} onOpenChange={(open) => { if (!open) setPending(null); }}>
       <AlertDialogContent>
