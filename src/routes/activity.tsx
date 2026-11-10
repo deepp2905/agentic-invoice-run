@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Avatar, Chip, PageTitle } from "@/components/system";
+import { useEffect, useState, type ReactNode } from "react";
+import { Avatar, PageTitle } from "@/components/system";
 import { activityHistory, type ActivityActor } from "@/lib/mock-activity";
 import { IconArrowBackUp as Undo2, IconHistory as History, IconRobot as Robot } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
@@ -42,11 +42,20 @@ function ActorMark({ actor }: { actor: ActivityActor }) {
     ? <span aria-label={actor.name} className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-secondary text-muted-foreground"><Robot className="size-4" /></span>
     : <Avatar name={actor.name} />;
 }
-function ActorMeta({ actor, time, isYou }: { actor: ActivityActor; time: string; isYou?: boolean }) {
-  return <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-    <Chip tone="neutral">{actor.type === "agent" ? "Agent" : "Person"}</Chip>
-    <span className="text-foreground/80">{isYou ? "You" : actor.name}</span>·<time>{time}</time>
-  </p>;
+/** One row shape for people and agents: event on the left, who and when on the right, action slot last. */
+function ActivityRow({ actor, message, affects, time, isYou, struck, action }: { actor: ActivityActor; message: string; affects?: string | undefined; time: string; isYou?: boolean; struck?: boolean; action?: ReactNode }) {
+  return <li className="flex items-center gap-4 py-4">
+    <ActorMark actor={actor} />
+    <div className="min-w-0 flex-1">
+      <p className={`truncate font-medium ${struck ? "text-muted-foreground line-through" : ""}`}>{message}</p>
+      {affects && <p className="mt-0.5 truncate text-sm text-muted-foreground">{affects}</p>}
+    </div>
+    <div className="w-44 shrink-0 text-right text-sm">
+      <p className="truncate text-foreground/80">{isYou ? "You" : actor.name}</p>
+      <time className="mt-0.5 block text-muted-foreground">{time}</time>
+    </div>
+    <div className="flex w-24 shrink-0 justify-end">{action}</div>
+  </li>;
 }
 
 function ActivityPage() {
@@ -70,19 +79,9 @@ function ActivityPage() {
     {entries.length + history.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No changes yet.</div> :
       <ol className="divide-y divide-border border-y border-border">{entries.map((entry) => {
         const undoable = isUndoable(entry) && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone && (entry.kind !== "toggle" || item.ruleId === entry.ruleId))?.id === entry.id;
-        return <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
-          <div className="flex items-start gap-3">
-            <ActorMark actor={you} />
-            <div><p className={`font-medium ${entry.undone ? "text-muted-foreground line-through" : ""}`}>{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<ActorMeta actor={you} time={entry.time} isYou /></div>
-          </div>
-          {entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => setPending(entry)}><Undo2 />Undo</Button>}
-        </li>;
-      })}{history.map((entry) => <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
-          <div className="flex items-start gap-3">
-            <ActorMark actor={entry.actor} />
-            <div><p className="font-medium">{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<ActorMeta actor={entry.actor} time={entry.time} /></div>
-          </div>
-        </li>)}</ol>}
+        return <ActivityRow key={entry.id} actor={you} isYou message={entry.message} affects={entry.affects} time={entry.time} struck={!!entry.undone}
+          action={entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => setPending(entry)}><Undo2 />Undo</Button>} />;
+      })}{history.map((entry) => <ActivityRow key={entry.id} actor={entry.actor} message={entry.message} affects={entry.affects} time={entry.time} />)}</ol>}
     <AlertDialog open={pending !== null} onOpenChange={(open) => { if (!open) setPending(null); }}>
       <AlertDialogContent>
         <AlertDialogTitle>Undo this change?</AlertDialogTitle>
