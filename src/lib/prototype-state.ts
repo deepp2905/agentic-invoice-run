@@ -12,7 +12,7 @@ export interface LogEntry {
   ruleId?: RuleId;
   previousEnabled?: boolean;
   affects?: string;
-  at?: number;
+  at?: number | undefined;
   undone?: boolean;
 }
 export interface PrototypeState {
