@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { PageTitle } from "@/components/system";
-import { IconArrowBackUp as Undo2, IconHistory as History, IconPencil as Pencil, IconPlayerPause as Pause, IconPlayerPlay as Play, IconToggleRight as Toggle } from "@tabler/icons-react";
+import { Avatar, Chip, PageTitle } from "@/components/system";
+import { activityHistory, type ActivityActor } from "@/lib/mock-activity";
+import { IconArrowBackUp as Undo2, IconHistory as History, IconRobot as Robot } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { isUndoable, ruleNames, type ActionKind, type LogCategory, type LogEntry } from "@/lib/prototype-state";
+import { isUndoable, ruleNames, type LogCategory, type LogEntry } from "@/lib/prototype-state";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({ meta: [
@@ -20,7 +21,6 @@ export const Route = createFileRoute("/activity")({
   component: ActivityPage,
 });
 
-const kindIcon: Record<ActionKind, typeof Play> = { pause: Pause, rule: Pencil, toggle: Toggle, replay: Play, undo: Undo2 };
 const filters: { id: "all" | LogCategory; label: string }[] = [
   { id: "all", label: "All" },
   { id: "rules", label: "Rules" },
@@ -35,6 +35,20 @@ function undoDetails(entry: LogEntry) {
   return { subject: entry.ruleId ? ruleNames[entry.ruleId] : "Rule", now: wasOn ? "Off" : "On", after: wasOn ? "On" : "Off", next: wasOn ? "The rule is turned back on and applies to new runs again." : "The rule is turned off and stops applying to new runs." };
 }
 
+const you: ActivityActor = { type: "person", name: "Neha Hiremath" };
+/** Same slot for every row: a round initial for people, a square robot tile for agents. */
+function ActorMark({ actor }: { actor: ActivityActor }) {
+  return actor.type === "agent"
+    ? <span aria-label={actor.name} className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-secondary text-muted-foreground"><Robot className="size-4" /></span>
+    : <Avatar name={actor.name} />;
+}
+function ActorMeta({ actor, time, isYou }: { actor: ActivityActor; time: string; isYou?: boolean }) {
+  return <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+    <Chip tone="neutral">{actor.type === "agent" ? "Agent" : "Person"}</Chip>
+    <span className="text-foreground/80">{isYou ? "You" : actor.name}</span>·<time>{time}</time>
+  </p>;
+}
+
 function ActivityPage() {
   const { state, dispatch } = usePrototype();
   const [filter, setFilter] = useState<"all" | LogCategory>("all");
@@ -42,6 +56,7 @@ function ActivityPage() {
   useEffect(() => { dispatch({ type: "seen" }); }, [dispatch, state.log.length]);
   const details = pending ? undoDetails(pending) : null;
   const entries = state.log.filter((entry) => filter === "all" || entry.category === filter);
+  const history = activityHistory.filter((entry) => filter === "all" || entry.category === filter);
   return <AppShell>
     <PageTitle>Activity</PageTitle>
     <div className="mb-6 flex gap-2" role="tablist" aria-label="Filter activity">
@@ -52,18 +67,22 @@ function ActivityPage() {
         </button>
       ))}
     </div>
-    {entries.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No changes yet.</div> :
+    {entries.length + history.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No changes yet.</div> :
       <ol className="divide-y divide-border border-y border-border">{entries.map((entry) => {
-        const Icon = kindIcon[entry.kind];
         const undoable = isUndoable(entry) && !entry.undone && state.log.find((item) => item.kind === entry.kind && !item.undone && (entry.kind !== "toggle" || item.ruleId === entry.ruleId))?.id === entry.id;
         return <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
           <div className="flex items-start gap-3">
-            <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" />
-            <div><p className={`font-medium ${entry.undone ? "text-muted-foreground line-through" : ""}`}>{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<p className="mt-1 text-sm text-muted-foreground"><time>{entry.time}</time> · You</p></div>
+            <ActorMark actor={you} />
+            <div><p className={`font-medium ${entry.undone ? "text-muted-foreground line-through" : ""}`}>{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<ActorMeta actor={you} time={entry.time} isYou /></div>
           </div>
           {entry.undone ? <span className="text-sm text-muted-foreground">Undone</span> : undoable && <Button variant="secondary" size="sm" aria-label={`Undo: ${entry.message}`} onClick={() => setPending(entry)}><Undo2 />Undo</Button>}
         </li>;
-      })}</ol>}
+      })}{history.map((entry) => <li key={entry.id} className="flex flex-wrap items-center justify-between gap-4 py-5">
+          <div className="flex items-start gap-3">
+            <ActorMark actor={entry.actor} />
+            <div><p className="font-medium">{entry.message}</p>{entry.affects && <p className="mt-1 text-sm text-foreground/80">{entry.affects}</p>}<ActorMeta actor={entry.actor} time={entry.time} /></div>
+          </div>
+        </li>)}</ol>}
     <AlertDialog open={pending !== null} onOpenChange={(open) => { if (!open) setPending(null); }}>
       <AlertDialogContent>
         <AlertDialogTitle>Undo this change?</AlertDialogTitle>
