@@ -1,4 +1,5 @@
 # Prototype additions
+- [x] Verified keyboard-only button focus, 40px extra bottom clearance, and Activity filter/list consistency
 - [x] Judge readiness: fresh-load defaults, session hints, readable fit/scroll, grouped replays, About panel and navigation checks
 - [x] Requested public publishing of the verified changes
 - [x] Functional Runs (8 rows, tabs, search, live statuses), Rules (4 rules, toggles, editor + versions), Activity (filters, undo), sidebar Reset demo — verify cross-page state

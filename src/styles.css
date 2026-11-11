@@ -240,6 +240,16 @@
 }
 
 @layer base {
+  button:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
   * {
     border-color: var(--color-border);
   }

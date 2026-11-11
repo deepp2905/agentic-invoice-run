@@ -1,5 +1,10 @@
 import type { LogCategory } from "@/lib/prototype-state";
 
+export type ActivityFilter = "all" | LogCategory;
+export function filterActivity<T extends { category: LogCategory }>(entries: T[], filter: ActivityFilter): T[] {
+  return filter === "all" ? entries : entries.filter(entry => entry.category === filter);
+}
+
 /** Past activity shown beneath live actions. Read-only: none of it can be undone. */
 export type ActivityActor = { type: "agent" | "person"; name: string };
 export interface HistoryEntry { id: string; actor: ActivityActor; category: LogCategory; message: string; affects?: string; time: string }

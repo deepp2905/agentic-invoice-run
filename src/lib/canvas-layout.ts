@@ -29,7 +29,7 @@ export function clearLabelPosition(x: number, y: number, width: number, height: 
   }
   return { x, y: top };
 }
-export const replayFit = { padding: 32, bottomSpace: 80, maxZoom: 0.8, minZoom: 0.4, toastSpace: 72, paidAgainReserve: 40 };
+export const replayFit = { padding: 32, bottomSpace: 120, maxZoom: 0.8, minZoom: 0.4, toastSpace: 72, paidAgainReserve: 40 };
 /** Fit bounds inside the canvas with fixed screen padding, reserved toast space on top and empty space below the lowest node. */
 export function replayViewport(bounds: CanvasBounds, width: number, height: number) {
   const { padding, bottomSpace, maxZoom, toastSpace } = replayFit;

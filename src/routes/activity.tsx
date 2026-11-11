@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Avatar, PageTitle } from "@/components/system";
-import { activityHistory, type ActivityActor } from "@/lib/mock-activity";
+import { activityHistory, filterActivity, type ActivityActor } from "@/lib/mock-activity";
 import { IconArrowBackUp as Undo2, IconHistory as History, IconRobot as Robot } from "@tabler/icons-react";
 import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
@@ -62,8 +62,8 @@ function ActivityPage() {
   const [pending, setPending] = useState<LogEntry | null>(null);
   useEffect(() => { dispatch({ type: "seen" }); }, [dispatch, state.log.length]);
   const details = pending ? undoDetails(pending) : null;
-  const entries = state.log.filter((entry) => filter === "all" || entry.category === filter);
-  const history = activityHistory.filter((entry) => filter === "all" || entry.category === filter);
+  const entries = filterActivity(state.log, filter);
+  const history = filterActivity(activityHistory, filter);
   return <AppShell>
     <PageTitle>Activity</PageTitle>
     <div className="mb-6 flex gap-2" role="tablist" aria-label="Filter activity">
