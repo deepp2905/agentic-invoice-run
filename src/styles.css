@@ -87,6 +87,10 @@
   --xy-handle-border-color: var(--canvas-wire);
   --xy-attribution-background-color: var(--background);
 }
+.canvas-fitted { min-height: var(--canvas-fit-height); }
+@media (max-width: 1099px) {
+  .canvas-fitted { min-width: var(--canvas-scroll-width); }
+}
 .inspection-node {
   width: var(--node-width);
   font-size: var(--node-text-size);
@@ -186,6 +190,8 @@
   --destructive-soft-hover: color-mix(in oklab, var(--destructive) 24%, var(--secondary));
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
+  --canvas-fit-height: 680px;
+  --canvas-scroll-width: 1100px;
   --node-width: 304px;
   --matching-node-width: 336px;
   --node-text-size: 18px;

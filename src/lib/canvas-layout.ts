@@ -29,11 +29,11 @@ export function clearLabelPosition(x: number, y: number, width: number, height: 
   }
   return { x, y: top };
 }
-export const replayFit = { padding: 32, bottomSpace: 80, maxZoom: 0.85, minZoom: 0.4, toastSpace: 72, paidAgainReserve: 40 };
+export const replayFit = { padding: 32, bottomSpace: 80, maxZoom: 0.8, minZoom: 0.4, toastSpace: 72, paidAgainReserve: 40 };
 /** Fit bounds inside the canvas with fixed screen padding, reserved toast space on top and empty space below the lowest node. */
 export function replayViewport(bounds: CanvasBounds, width: number, height: number) {
-  const { padding, bottomSpace, maxZoom, minZoom, toastSpace } = replayFit;
+  const { padding, bottomSpace, maxZoom, toastSpace } = replayFit;
   const top = padding + toastSpace, bottom = padding + bottomSpace;
-  const zoom = Math.max(minZoom, Math.min(maxZoom, (width - 2 * padding) / bounds.width, (height - top - bottom) / bounds.height));
+  const zoom = Math.min(maxZoom, (width - 2 * padding) / bounds.width, (height - top - bottom) / bounds.height);
   return { x: (width - bounds.width * zoom) / 2 - bounds.x * zoom, y: top + (height - top - bottom - bounds.height * zoom) / 2 - bounds.y * zoom, zoom };
 }

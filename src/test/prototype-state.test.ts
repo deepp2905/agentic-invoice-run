@@ -2,6 +2,28 @@ import { describe, expect, it } from "vitest";
 import { effectiveRule, runStatus as status, initialPrototypeState, prototypeReducer, queuedInvoices, queuedInvoiceState, replayOutcome, runStatus } from "@/lib/prototype-state";
 
 describe("Finance prototype actions", () => {
+  it("groups consecutive identical replay results, but not other runs or outcomes", () => {
+    let state = prototypeReducer(initialPrototypeState, { type: "replay", caught: false, time: "a" });
+    state = prototypeReducer(state, { type: "replay", caught: false, time: "b" });
+    expect(state.log).toHaveLength(1);
+    expect(state.log[0]?.replayCount).toBe(2);
+    expect(state.nextId).toBe(2);
+    state = prototypeReducer(state, { type: "replay", caught: true, time: "c" });
+    expect(state.log).toHaveLength(2);
+    state = prototypeReducer(state, { type: "replay", caught: false, completedRunId: "INV-4790", time: "d" });
+    expect(state.log).toHaveLength(3);
+    state = prototypeReducer(state, { type: "pause", time: "e" });
+    state = prototypeReducer(state, { type: "replay", caught: false, completedRunId: "INV-4790", time: "f" });
+    expect(state.log).toHaveLength(5);
+  });
+  it("hides session hints without adding user actions to Activity", () => {
+    let state = prototypeReducer(initialPrototypeState, { type: "investigate" });
+    state = prototypeReducer(state, { type: "replay-start" });
+    expect(state.investigated).toBe(true);
+    expect(state.replayStarted).toBe(true);
+    expect(state.log).toHaveLength(0);
+    expect(prototypeReducer(state, { type: "reset" }).investigated).toBe(false);
+  });
   it("pauses only INV-4821-B and INV-4821-C while D remains safe", () => {
     expect(queuedInvoices).toHaveLength(3);
     const state = prototypeReducer(initialPrototypeState, { type: "pause", time: "09:14" });

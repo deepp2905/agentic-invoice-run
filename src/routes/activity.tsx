@@ -10,7 +10,7 @@ import { isUndoable, ruleNames, type LogCategory, type LogEntry } from "@/lib/pr
 
 export const Route = createFileRoute("/activity")({
   head: () => ({ meta: [
-    { title: "Activity — Ledger Watch" },
+    { title: "Ledger Watch" },
     { name: "description", content: "Finance investigation actions, rule changes and replay results." },
     { property: "og:title", content: "Activity — Ledger Watch" },
     { property: "og:description", content: "Finance investigation actions, rule changes and replay results." },

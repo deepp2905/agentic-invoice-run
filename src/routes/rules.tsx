@@ -14,7 +14,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/rules")({
   head: () => ({
     meta: [
-      { title: "Rules — Ledger Watch" },
+      { title: "Ledger Watch" },
       { name: "description", content: "Policy rules applied by invoice agents." },
       { property: "og:title", content: "Rules — Ledger Watch" },
       { property: "og:description", content: "Policy rules applied by invoice agents." },

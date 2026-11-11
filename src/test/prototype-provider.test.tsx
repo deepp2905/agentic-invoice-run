@@ -4,6 +4,19 @@ import { PrototypeProvider, usePrototype } from "@/components/PrototypeProvider"
 import { getPrototypeContext } from "@/components/prototype-context";
 
 describe("Prototype context lifecycle", () => {
+  it("starts a fresh root mount with default data and no user actions", () => {
+    const first = renderHook(() => usePrototype(), { wrapper: PrototypeProvider });
+    act(() => {
+      first.result.current.dispatch({ type: "pause", time: "a" });
+      first.result.current.dispatch({ type: "rule", rule: "combined", time: "b" });
+    });
+    expect(first.result.current.state.log).toHaveLength(2);
+    first.unmount();
+    const fresh = renderHook(() => usePrototype(), { wrapper: PrototypeProvider });
+    expect(fresh.result.current.state.paused).toBe(false);
+    expect(fresh.result.current.state.rule).toBe("exact");
+    expect(fresh.result.current.state.log).toHaveLength(0);
+  });
   it("retains the same context identity across live module replacements", () => {
     const cache = {};
     const mounted = getPrototypeContext(cache);

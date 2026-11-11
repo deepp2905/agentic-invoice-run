@@ -3,8 +3,10 @@ import { IconActivity as Activity, IconShieldCheck as ShieldCheck, IconHistory a
 import { Hint } from "@/components/Hint";
 import { Avatar } from "@/components/system";
 import { usePrototype } from "@/components/PrototypeProvider";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
 const nav = [
   { to: "/", label: "Runs", icon: Activity, exact: true },
@@ -16,8 +18,8 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
   const { state, dispatch } = usePrototype();
   const unread = state.log.filter((e) => e.id > state.lastSeenLogId).length;
   const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => { setCollapsed(localStorage.getItem("sidebar-collapsed") === "1"); }, []);
-  const toggle = () => setCollapsed(c => { localStorage.setItem("sidebar-collapsed", c ? "0" : "1"); return !c; });
+  const [about, setAbout] = useState(false);
+  const toggle = () => setCollapsed(c => !c);
   const Toggle = collapsed ? PanelLeftOpen : PanelLeftClose;
   return (
     <div className={`flex w-full bg-background text-foreground ${canvas ? "h-dvh overflow-hidden" : "min-h-screen"}`}>
@@ -47,6 +49,7 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
             className={`flex items-center gap-3 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? "justify-center px-2" : "px-3"}`}>
             <Restore className="h-4 w-4 shrink-0" />{!collapsed && <span>Reset demo</span>}
           </button></Hint>
+          <Button variant="ghost" size="sm" className="h-auto justify-start whitespace-normal px-3 text-xs text-muted-foreground" onClick={() => setAbout(true)}>About this prototype</Button>
           <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : "px-2"}`}>
             <Avatar name="Neha Hiremath" label={collapsed ? "Neha Hiremath" : undefined} />
             {!collapsed && <div className="min-w-0"><p className="truncate text-sm font-medium">Neha Hiremath</p><p className="truncate text-xs text-muted-foreground">Finance lead</p></div>}
@@ -54,6 +57,16 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
         </div>
       </aside>
       <main className={canvas ? "flex min-h-0 min-w-0 flex-1 flex-col" : "min-w-0 flex-1 px-6 py-10 lg:px-12 max-sm:px-4"}>{children}</main>
+      <Sheet open={about} onOpenChange={setAbout}>
+        <SheetContent className="bg-card p-8" onAnimationEnd={event => event.stopPropagation()}>
+          <SheetTitle>About this prototype</SheetTitle>
+          <SheetDescription className="mt-6 space-y-4" asChild><div>
+            <p>You are a finance lead.</p>
+            <p>An AI agent paid an invoice twice.</p>
+            <p>Data is simulated. Interactions are real.</p>
+          </div></SheetDescription>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

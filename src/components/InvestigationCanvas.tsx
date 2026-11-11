@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Background, BackgroundVariant, BaseEdge, EdgeLabelRenderer, Handle, Position, ReactFlow, ReactFlowProvider, getViewportForBounds, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps, type Viewport } from "@xyflow/react";
+import { Background, BackgroundVariant, BaseEdge, EdgeLabelRenderer, Handle, Position, ReactFlow, ReactFlowProvider, useNodesInitialized, useNodesState, useReactFlow, useUpdateNodeInternals, useViewport, type Edge, type EdgeProps, type Node, type NodeProps, type Viewport } from "@xyflow/react";
 import { IconCheck as Check, IconCircleDashed as CircleDashed, IconFileSearch as FileScan, IconFiles as Files, IconGitCompare as GitCompareArrows, IconLoader2 as LoaderCircle, IconMinus as Minus, IconPlus as Plus, IconReceipt as Receipt, IconRestore as RotateCcw, IconShieldCheck as ShieldCheck, IconPlayerSkipForward as SkipForward, IconAlertTriangle as AlertTriangle, IconX as X } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import type { Agent } from "@/lib/mock-data";
@@ -107,6 +107,7 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
   const initialized = useNodesInitialized();
   const container = useRef<HTMLDivElement>(null), initializedOnce = useRef(false), frame = useRef(0), delay = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reduced = useRef(false), [focus, setFocus] = useState<string | null>(null), [count, setCount] = useState(run.agents[1]?.confidence ?? 62);
+  const [fitted, setFitted] = useState(false);
   const { getViewport, setViewport, getNodesBounds, getNode } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(ids.map((id, i) => ({ id, type: "inspection", position: canvasLayout.positions[i] ?? { x: 0, y: 0 }, data: { run, kind: i === 0 ? "queue" : i === 5 ? "output" : "agent", agent: run.agents[i - 1], outcome: "pending", detail: "", paused, paidAgain: false, count: 62, onInspect } })));
   const cancel = useCallback(() => { cancelAnimationFrame(frame.current); if (delay.current) clearTimeout(delay.current); delay.current = null; setCount(run.agents[1]?.confidence ?? 62); }, [run]);
@@ -127,9 +128,10 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     setFocus(null);
     const element = container.current;
     if (!element) return;
-    animate(getViewportForBounds(getNodesBounds(ids), element.clientWidth, element.clientHeight, canvasLayout.minimumZoom, 1, `${canvasLayout.padding}px`), duration);
+    animate(replayViewport(getNodesBounds(ids), element.clientWidth, element.clientHeight), duration);
   }, [animate, getNodesBounds]);
   const replayFrame = useCallback((paidAgain: boolean) => {
+    setFitted(true);
     setFocus(null);
     const element = container.current;
     if (!element) return;
@@ -139,6 +141,12 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     const bounds = { ...b, height: Math.max(b.y + b.height, outputBottom) - b.y };
     animate(replayViewport(bounds, element.clientWidth, element.clientHeight), canvasLayout.cameraDuration);
   }, [animate, getNodesBounds, getNode]);
+  useEffect(() => {
+    if (!fitted || !container.current) return;
+    const observer = new ResizeObserver(() => replayFrame(hasNewReceipt(replay)));
+    observer.observe(container.current);
+    return () => observer.disconnect();
+  }, [fitted, replayFrame, replay]);
   const focusNode = useCallback((id: string) => {
     const node = getNode(id), element = container.current;
     if (!node || !element) return;
@@ -180,7 +188,7 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     const label = i === 1 ? "Passed extracted fields" : i === 2 ? state === "failed" ? "Duplicate flagged" : run.duplicate ? "Handed off without a flag" : "Passed verified PO match" : i === 3 && state !== "failed" ? "Approved for payment" : undefined;
     return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2 && run.duplicate, elbow: i === 2, onLine: i === 1 || i === 2, bounds } };
   });
-  return <div className="flex min-h-0 flex-1 flex-col"><div ref={container} className={`investigation-canvas relative min-h-0 flex-1 overflow-hidden ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
+  return <div className="flex min-h-0 flex-1 flex-col"><div className="canvas-scroll-area min-h-0 flex-1 overflow-auto"><div ref={container} className={`investigation-canvas relative h-full overflow-hidden ${fitted ? "canvas-fitted" : ""} ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} minZoom={replayFit.minZoom} maxZoom={1.8} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStart={interrupt} onNodeDragStop={(_, dragged) => setNodes(current => {
       const size = (n: FlowNode) => ({ width: n.measured?.width ?? 240, height: n.measured?.height ?? 140 });
       const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));
@@ -189,5 +197,5 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     })} proOptions={{ hideAttribution: true }}>
       <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
     </ReactFlow>
-  </div><CanvasControls onInterrupt={interrupt} onFull={() => fullFlow()} onReset={() => { interrupt(); setNodes(current => current.map((node, i) => ({ ...node, position: canvasLayout.positions[i] ?? node.position }))); delay.current = setTimeout(() => fullFlow(), 100); }} /></div>;
+  </div></div><CanvasControls onInterrupt={interrupt} onFull={() => replayFrame(hasNewReceipt(replay))} onReset={() => { interrupt(); setNodes(current => current.map((node, i) => ({ ...node, position: canvasLayout.positions[i] ?? node.position }))); delay.current = setTimeout(() => replayFrame(hasNewReceipt(replay)), 100); }} /></div>;
 }

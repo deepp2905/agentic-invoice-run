@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Runs — Ledger Watch" },
+      { title: "Ledger Watch" },
       { name: "description", content: "Monitor AI agent runs processing vendor invoices." },
       { property: "og:title", content: "Runs — Ledger Watch" },
       { property: "og:description", content: "Monitor AI agent runs processing vendor invoices." },
@@ -31,7 +31,7 @@ const tabs: { id: Tab; label: string }[] = [
 ];
 
 function RunsPage() {
-  const { state } = usePrototype();
+  const { state, dispatch } = usePrototype();
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const rows = runs.map((run) => ({ ...run, status: runStatus(run.id, state) }));
@@ -49,7 +49,7 @@ function RunsPage() {
   const checkOff = !state.ruleEnabled.duplicate;
   return (
     <AppShell>
-      <Notice tone={held ? "success" : "destructive"} size="lg" icon={held ? CircleCheck : AlertTriangle} className="mb-10" action={<Button asChild variant={held ? "secondary" : "default"}><Link to="/runs/$runId" params={{ runId: alert.runId }}>{held ? "View run" : "Investigate"}</Link></Button>}>
+      <Notice tone={held ? "success" : "destructive"} size="lg" icon={held ? CircleCheck : AlertTriangle} className="mb-3" action={<Button asChild variant={held ? "secondary" : "default"}><Link to="/runs/$runId" onClick={() => dispatch({ type: "investigate" })} params={{ runId: alert.runId }}>{held ? "View run" : "Investigate"}</Link></Button>}>
         {held ? <>
           <p className="text-base font-medium">Invoice {alert.invoice} duplicate caught, payment held.</p>
           <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor} · {alert.amount} not paid</p>
@@ -58,6 +58,7 @@ function RunsPage() {
           <p className="mt-1 text-muted-foreground">Vendor: {alert.vendor}{checkOff ? " · Duplicate check is off" : ""}</p>
         </>}
       </Notice>
+      <div className="mb-10">{!held && !state.investigated && <p className="text-sm text-muted-foreground">Start here: click Investigate to see what the agent did.</p>}</div>
 
       <PageTitle>Runs</PageTitle>
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -97,7 +98,7 @@ function RunsPage() {
                   <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
                   <td className="px-6 py-4 text-right">
                     <Button asChild size="sm" className="w-32 justify-between" variant={investigate ? "warning" : "secondary"}>
-                      <Link to="/runs/$runId" params={{ runId: r.id }}>
+                      <Link to="/runs/$runId" params={{ runId: r.id }} onClick={() => { if (investigate) dispatch({ type: "investigate" }); }}>
                         {investigate ? "Investigate" : "View run"}
                         <ArrowRight className="size-4" />
                       </Link>

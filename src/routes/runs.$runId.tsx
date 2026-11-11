@@ -20,7 +20,7 @@ export const Route = createFileRoute("/runs/$runId")({
   },
   head: ({ params }) => ({
     meta: [
-      { title: `Run ${params.runId} — Ledger Watch` },
+      { title: "Ledger Watch" },
       { name: "description", content: "Agent inspection line for an invoice payment run." },
       { property: "og:title", content: `Run ${params.runId} — Ledger Watch` },
       { property: "og:description", content: "Agent inspection line for an invoice payment run." },
@@ -81,7 +81,8 @@ function RunDetailView({ run }: { run: RunDetail }) {
       <Link to="/" aria-label="Back to Runs" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /></Link>
       <div><h1 className="text-xl font-semibold">{run.duplicate ? `${run.amount} paid twice` : `${run.amount} paid`}</h1><p className="text-xs text-muted-foreground">{run.id} · {run.vendor}</p></div>
       <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : !state.ruleEnabled.duplicate ? "Paid again · Duplicate check is off" : "Paid again, duplicate was not caught"}</p>
-        <Button disabled={running} onClick={() => { setSelected(null); toast.dismiss(); setReplay(startSavedReplay({ rule: effectiveRule(getCurrentState()) }, run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
+        <Button disabled={running} onClick={() => { dispatch({ type: "replay-start" }); setSelected(null); toast.dismiss(); setReplay(startSavedReplay({ rule: effectiveRule(getCurrentState()) }, run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
+      {!state.replayStarted && <p className="w-full text-xs text-muted-foreground">Try: Review match, Replay run, Pause similar runs, Edit rule.</p>}
     </header>
     <InvestigationCanvas run={run} replay={displayedReplay} paused={state.paused} onInspect={setSelected} />
     <footer ref={footer} className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">

@@ -1,4 +1,6 @@
 # Prototype additions
+- [x] Judge readiness: fresh-load defaults, session hints, readable fit/scroll, grouped replays, About panel and navigation checks
+- [ ] Request public publishing after saving the verified changes
 - [x] Functional Runs (8 rows, tabs, search, live statuses), Rules (4 rules, toggles, editor + versions), Activity (filters, undo), sidebar Reset demo — verify cross-page state
 - [x] Keep arrow captions anchored near their connector, using compact tooltips when full captions cannot fit
 - [x] Replace the brief-only README with project setup and architecture documentation

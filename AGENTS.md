@@ -32,6 +32,8 @@ use the editor.
 ## Prototype architecture
 - Resolve each run through the browser-safe mock-runs catalog; keep historical agent evidence and receipts separate from duplicate-only replay and shared remediation state so unrelated runs never inherit a hold.
 - Keep cross-page prototype actions in a root-mounted React context with a pure reducer so navigation preserves state and undo/replay remain testable without persistence.
+- Initialize demo and hint state per root mount without browser storage; group identical consecutive replay results in the reducer to keep fresh loads predictable and Activity concise.
+- Fit through the shared replay framing helper inside a scrollable canvas area with a readable minimum height/width; keep zoom and decision controls outside the scrolling content.
 - Keep prototype context identity in a separate browser-safe module cached in Vite hot data, so live-updated consumers remain attached to the mounted root provider.
 - Use React Flow for the investigation canvas and a pure replay state machine for node outcomes and connector handoffs; keep viewport movement separate from fixed page controls.
 - Use two left-to-right rows and a bottom-to-top elbow for the cross-row handoff; keep layout and timing constants in a tested browser-safe module.

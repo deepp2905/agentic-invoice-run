@@ -31,7 +31,7 @@ describe("Run canvas layout", () => {
 import { replayViewport } from "@/lib/canvas-layout";
 describe("Replay fit", () => {
   it("never exceeds 85% zoom", () => {
-    expect(replayViewport({ x: 0, y: 0, width: 100, height: 100 }, 2000, 2000).zoom).toBe(0.85);
+    expect(replayViewport({ x: 0, y: 0, width: 100, height: 100 }, 2000, 2000).zoom).toBe(0.8);
   });
   it("keeps 32px sides and 80px empty space below the lowest node", () => {
     const b = { x: 0, y: 0, width: 1000, height: 600 };

@@ -14,6 +14,8 @@ export interface LogEntry {
   affects?: string;
   at?: number | undefined;
   undone?: boolean;
+  replayCount?: number;
+  replayKey?: string;
 }
 export interface PrototypeState {
   paused: boolean;
@@ -23,6 +25,8 @@ export interface PrototypeState {
   log: LogEntry[];
   nextId: number;
   lastSeenLogId: number;
+  investigated: boolean;
+  replayStarted: boolean;
 }
 export type PrototypeAction =
   | { type: "pause"; time: string }
@@ -31,7 +35,9 @@ export type PrototypeAction =
   | { type: "replay"; caught: boolean; time: string; completedRunId?: string }
   | { type: "undo"; id: number; time: string }
   | { type: "reset" }
-  | { type: "seen" };
+  | { type: "seen" }
+  | { type: "investigate" }
+  | { type: "replay-start" };
 
 export const ruleNames: Record<RuleId, string> = {
   duplicate: "Duplicate check",
@@ -48,6 +54,8 @@ export const initialPrototypeState: PrototypeState = {
   log: [],
   nextId: 1,
   lastSeenLogId: 0,
+  investigated: false,
+  replayStarted: false,
 };
 
 export const queuedInvoices = [
@@ -85,6 +93,8 @@ export function runStatus(runId: string, state: Pick<PrototypeState, "paused" | 
 
 export function prototypeReducer(state: PrototypeState, action: PrototypeAction): PrototypeState {
   if (action.type === "reset") return initialPrototypeState;
+  if (action.type === "investigate") return { ...state, investigated: true };
+  if (action.type === "replay-start") return { ...state, replayStarted: true };
   if (action.type === "seen") return state.lastSeenLogId === state.nextId - 1 ? state : { ...state, lastSeenLogId: state.nextId - 1 };
   let update: Partial<PrototypeState> = {};
   let entry: Omit<LogEntry, "id" | "time">;
@@ -113,6 +123,14 @@ export function prototypeReducer(state: PrototypeState, action: PrototypeAction)
   } else if (action.type === "replay") {
     if (action.caught) update = { heldDuplicate: true };
     entry = { kind: "replay", category: "runs", message: action.completedRunId ? `Replay completed for ${action.completedRunId}, payment verified` : action.caught ? "Replay completed, duplicate caught" : "Replay completed, invoice paid again", affects: action.completedRunId ? `${action.completedRunId} verified` : action.caught ? "INV-4821-A held, not paid" : "INV-4821-A paid again" };
+    const replayKey = `${action.completedRunId ?? "INV-4821-A"}:${action.caught ? "held" : "paid"}`;
+    const last = state.log[0];
+    if (last?.kind === "replay" && last.replayKey === replayKey) {
+      const replayCount = (last.replayCount ?? 1) + 1;
+      const message = `${entry.message} (${replayCount} times)`;
+      return { ...state, ...update, log: [{ ...last, message, replayCount, time: action.time }, ...state.log.slice(1)] };
+    }
+    entry = { ...entry, replayKey, replayCount: 1 };
   } else {
     const target = state.log.find((item) => item.id === action.id);
     if (!target || target.undone || !isUndoable(target)) return state;
