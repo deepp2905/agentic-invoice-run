@@ -14,10 +14,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/rules")({
   head: () => ({
     meta: [
-      { title: "Ledger Watch" },
-      { name: "description", content: "Policy rules applied by invoice agents." },
-      { property: "og:title", content: "Rules — Ledger Watch" },
-      { property: "og:description", content: "Policy rules applied by invoice agents." },
+      { title: "Backstop" },
+      { name: "description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
+      { property: "og:title", content: "Backstop" },
+      { property: "og:description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

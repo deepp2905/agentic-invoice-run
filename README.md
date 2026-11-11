@@ -1,4 +1,4 @@
-# Ledger Watch — Invoice Run Insight
+# Backstop — Invoice Run Insight
 
 A frontend-only prototype for finance teams investigating AI-agent invoice payments. Explore individual invoice runs, inspect agent evidence, fix a duplicate rule, and replay the workflow without making real payments.
 

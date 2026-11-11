@@ -26,8 +26,8 @@ export function AppShell({ children, canvas = false }: { children: ReactNode; ca
       <aside className={`sticky top-0 flex h-dvh shrink-0 flex-col border-r border-border bg-sidebar py-4 transition-[width] duration-200 ${collapsed ? "w-16 px-2" : "w-60 px-3"}`}>
         <div className={`mb-6 flex items-center ${collapsed ? "flex-col gap-3" : "justify-between px-2"}`}>
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">LW</span>
-            {!collapsed && <span>Ledger Watch</span>}
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">B</span>
+            {!collapsed && <span>Backstop</span>}
           </div>
           <Hint label={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right"><button onClick={toggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground">
             <Toggle className="h-4 w-4" />

@@ -18,12 +18,12 @@ export const Route = createFileRoute("/runs/$runId")({
     if (!run) throw notFound();
     return run;
   },
-  head: ({ params }) => ({
+  head: () => ({
     meta: [
-      { title: "Ledger Watch" },
-      { name: "description", content: "Agent inspection line for an invoice payment run." },
-      { property: "og:title", content: `Run ${params.runId} — Ledger Watch` },
-      { property: "og:description", content: "Agent inspection line for an invoice payment run." },
+      { title: "Backstop" },
+      { name: "description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
+      { property: "og:title", content: "Backstop" },
+      { property: "og:description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

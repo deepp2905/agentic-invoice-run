@@ -10,10 +10,10 @@ import { isUndoable, ruleNames, type LogCategory, type LogEntry } from "@/lib/pr
 
 export const Route = createFileRoute("/activity")({
   head: () => ({ meta: [
-    { title: "Ledger Watch" },
-    { name: "description", content: "Finance investigation actions, rule changes and replay results." },
-    { property: "og:title", content: "Activity — Ledger Watch" },
-    { property: "og:description", content: "Finance investigation actions, rule changes and replay results." },
+    { title: "Backstop" },
+    { name: "description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
+    { property: "og:title", content: "Backstop" },
+    { property: "og:description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),

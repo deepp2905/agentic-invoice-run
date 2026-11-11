@@ -12,10 +12,10 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ledger Watch" },
-      { name: "description", content: "Monitor AI agent runs processing vendor invoices." },
-      { property: "og:title", content: "Runs — Ledger Watch" },
-      { property: "og:description", content: "Monitor AI agent runs processing vendor invoices." },
+      { title: "Backstop" },
+      { name: "description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
+      { property: "og:title", content: "Backstop" },
+      { property: "og:description", content: "Backstop helps finance teams watch what their AI agents do with money, and fix it when they get it wrong." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
