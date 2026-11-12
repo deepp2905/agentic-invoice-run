@@ -32,9 +32,9 @@ const notice = cva("flex items-start gap-3 rounded-lg text-sm", {
 });
 export function Notice({ tone, size, icon: Icon, action, className, children, role }: VariantProps<typeof notice> & { icon?: ComponentType<{ className?: string }>; action?: ReactNode; className?: string; children: ReactNode; role?: string }) {
   return <div role={role} className={cn(notice({ tone, size }), action && "flex-wrap items-center justify-between gap-6", className)}>
-    <div className="flex items-start gap-3">
+    <div className="flex min-w-0 items-start gap-3">
       {Icon && <Icon className={cn("mt-0.5 size-4 shrink-0", toneText[tone ?? "neutral"])} />}
-      <div>{children}</div>
+      <div className="min-w-0">{children}</div>
     </div>
     {action}
   </div>;

@@ -54,7 +54,8 @@ function RunDetailView({ run }: { run: RunDetail }) {
     const observer = new ResizeObserver(update);
     observer.observe(element); if (header) observer.observe(header); update();
     window.addEventListener("resize", update);
-    return () => { observer.disconnect(); window.removeEventListener("resize", update); document.body.classList.remove("run-toasts"); document.body.style.removeProperty("--run-toast-top"); };
+    window.addEventListener("scroll", update, true);
+    return () => { observer.disconnect(); window.removeEventListener("resize", update); window.removeEventListener("scroll", update, true); document.body.classList.remove("run-toasts"); document.body.style.removeProperty("--run-toast-top"); };
   }, []);
   useEffect(() => {
     if (!replay || replay.phase === "complete") return;
@@ -77,16 +78,16 @@ function RunDetailView({ run }: { run: RunDetail }) {
     return () => clearTimeout(timer);
   }, [replay, dispatch, run]);
   return <AppShell canvas>
-    <header className="run-header flex shrink-0 flex-wrap items-center gap-4 border-b border-border bg-background px-6 py-3 max-sm:px-4" aria-label={`Run ${runId}`}>
+    <header className="run-header grid shrink-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-border bg-background px-4 py-3 lg:flex lg:flex-wrap lg:gap-4 lg:px-6" aria-label={`Run ${runId}`}>
       <Link to="/" aria-label="Back to Runs" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /></Link>
-      <div><h1 className="text-xl font-semibold">{run.duplicate ? `${run.amount} paid twice` : `${run.amount} paid`}</h1><p className="text-xs text-muted-foreground">{run.id} · {run.vendor}</p></div>
-      <p role="status" className={`min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : !state.ruleEnabled.duplicate ? "Paid again · Duplicate check is off" : "Paid again, duplicate was not caught"}</p>
+      <div className="min-w-0"><h1 className="text-xl font-semibold">{run.duplicate ? `${run.amount} paid twice` : `${run.amount} paid`}</h1><p className="break-words text-xs text-muted-foreground">{run.id} · {run.vendor}</p></div>
+      <p role="status" className={`col-span-2 min-w-0 flex-1 text-sm ${!running && (caught || !run.duplicate) ? "text-success" : running ? "text-muted-foreground" : "text-destructive"}`}>{running ? "Replay in progress" : !run.duplicate ? "Completed · No issues found" :caught ? "Duplicate caught · Held at Check duplicates" : !state.ruleEnabled.duplicate ? "Paid again · Duplicate check is off" : "Paid again, duplicate was not caught"}</p>
         <Button disabled={running} onClick={() => { dispatch({ type: "replay-start" }); setSelected(null); toast.dismiss(); setReplay(startSavedReplay({ rule: effectiveRule(getCurrentState()) }, run.duplicate)); }}>{running ? <LoaderCircle className="motion-safe:animate-spin" /> : <Play />}{running ? "Replaying…" : "Replay run"}</Button>
-      {!state.replayStarted && <p className="w-full text-xs text-muted-foreground">Try: Review match, Replay run, Pause similar runs, Edit rule.</p>}
+      {!state.replayStarted && <p className="col-span-2 w-full text-xs text-muted-foreground">Try: Review match, Replay run, Pause similar runs, Edit rule.</p>}
     </header>
     <InvestigationCanvas run={run} replay={displayedReplay} paused={state.paused} onInspect={setSelected} />
     <footer ref={footer} className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-background px-6 py-4 max-sm:px-4">
-      <div className="flex items-center gap-4"><h2 className="text-lg font-semibold">{run.duplicate ? "Decide" : "Run complete"}</h2><p className="text-xs text-muted-foreground">{run.duplicate ? state.paused ? "2 similar invoices paused, 1 safe to release" : "2 similar invoices queued, 1 safe to release" : `${run.po} · ${run.receipt} · ${run.date}`}</p></div>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1"><h2 className="shrink-0 text-lg font-semibold">{run.duplicate ? "Decide" : "Run complete"}</h2><p className="min-w-0 break-words text-xs text-muted-foreground">{run.duplicate ? state.paused ? "2 similar invoices paused, 1 safe to release" : "2 similar invoices queued, 1 safe to release" : `${run.po} · ${run.receipt} · ${run.date}`}</p></div>
       {run.duplicate && <div className="flex flex-wrap gap-2"><Button variant="secondary" disabled={running} onClick={() => { if (state.paused) setSelected("pause"); else { dispatch({ type: "pause", time: actionTime() }); toast.success("2 similar runs paused", { duration: 3000 }); } }}>{state.paused ? <Check /> : <Pause />}{state.paused ? "Paused, 2 runs held" : "Pause similar runs"}</Button><Button variant="secondary" disabled={running} onClick={() => setSelected("rule")}><Pencil />Edit rule</Button></div>}
     </footer>
     <InvestigationPanels run={run} panel={selected} onClose={() => setSelected(null)} />

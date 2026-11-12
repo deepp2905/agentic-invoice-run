@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { actionTime, usePrototype } from "@/components/PrototypeProvider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { isUndoable, ruleNames, type LogCategory, type LogEntry } from "@/lib/prototype-state";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/activity")({
   head: () => ({ meta: [
@@ -43,13 +44,13 @@ function ActorMark({ actor }: { actor: ActivityActor }) {
 }
 /** One row shape for people and agents: event on the left, who and when on the right, action slot last. */
 function ActivityRow({ actor, message, affects, time, isYou, struck, action }: { actor: ActivityActor; message: string; affects?: string | undefined; time: string; isYou?: boolean; struck?: boolean; action?: ReactNode }) {
-  return <li className="flex items-center gap-4 py-4">
+  return <li className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2 py-4 lg:flex lg:items-center lg:gap-4">
     <ActorMark actor={actor} />
     <div className="min-w-0 flex-1">
-      <div className="flex min-w-0 items-center gap-3"><p className={`truncate font-medium ${struck ? "text-muted-foreground line-through" : ""}`}>{message}</p>{action}</div>
-      {affects && <p className="mt-0.5 truncate text-sm text-muted-foreground">{affects}</p>}
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"><p className={`min-w-0 break-words font-medium ${struck ? "text-muted-foreground line-through" : ""}`}>{message}</p>{action}</div>
+      {affects && <p className="mt-0.5 text-sm text-muted-foreground">{affects}</p>}
     </div>
-    <div className="w-44 shrink-0 text-right text-sm">
+    <div className="col-start-2 flex min-w-0 gap-2 text-xs lg:block lg:w-44 lg:shrink-0 lg:text-right lg:text-sm">
       <p className="truncate text-foreground/80">{isYou ? "You" : actor.name}</p>
       <time className="mt-0.5 block text-muted-foreground">{time}</time>
     </div>
@@ -68,10 +69,10 @@ function ActivityPage() {
     <PageTitle>Activity</PageTitle>
     <div className="mb-6 flex gap-2" role="tablist" aria-label="Filter activity">
       {filters.map((item) => (
-        <button key={item.id} role="tab" aria-selected={filter === item.id} onClick={() => setFilter(item.id)}
-          className={`rounded-sm px-3 py-1.5 text-sm transition-colors ${filter === item.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+        <Button variant="ghost" key={item.id} role="tab" aria-selected={filter === item.id} onClick={() => setFilter(item.id)}
+          className={`h-auto rounded-sm px-3 py-2 text-sm transition-colors ${filter === item.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
           {item.label}
-        </button>
+        </Button>
       ))}
     </div>
     {entries.length + history.length === 0 ? <div className="flex items-center gap-3 border-y border-border py-8 text-muted-foreground"><History className="h-5 w-5" />No changes yet.</div> :

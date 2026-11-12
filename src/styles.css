@@ -88,6 +88,21 @@
   --xy-attribution-background-color: var(--background);
 }
 .canvas-fitted { min-height: var(--canvas-fit-height); }
+@media (max-width: 767px) {
+  .canvas-workspace { flex: none; height: var(--mobile-canvas-height); }
+  .runs-table, .runs-table tbody { display: block; }
+  .runs-table thead { display: none; }
+  .runs-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 16px; }
+  .runs-table tr:first-child { border-top: 0; }
+  .runs-table td { min-width: 0; padding: 0; overflow-wrap: anywhere; }
+  .runs-table td:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .runs-table td:nth-child(4) { grid-column: 2; grid-row: 1; text-align: right; }
+  .runs-table td:nth-child(2) { grid-column: 1 / -1; }
+  .runs-table td:nth-child(5) { grid-column: 1; }
+  .runs-table td:nth-child(6) { grid-column: 2; align-self: end; }
+  .runs-table td[data-label]::before { content: attr(data-label); display: block; color: var(--muted-foreground); font-size: var(--text-xs); margin-bottom: 4px; }
+  .runs-table td[colspan] { grid-column: 1 / -1; padding: 16px 0; }
+}
 @media (max-width: 1099px) {
   .canvas-fitted { min-width: var(--canvas-scroll-width); }
 }
@@ -191,6 +206,7 @@
   --success: oklch(0.76 calc(0.17 * var(--state-chroma)) 155);
   /* Canvas geometry */
   --canvas-fit-height: 680px;
+  --mobile-canvas-height: clamp(360px, calc(100dvh - 360px), 600px);
   --canvas-scroll-width: 1100px;
   --node-width: 304px;
   --matching-node-width: 336px;

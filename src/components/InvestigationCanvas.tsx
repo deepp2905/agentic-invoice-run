@@ -153,7 +153,8 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     setFocus(id);
     if (reduced.current) { cancel(); return; }
     const x = node.position.x + (node.measured?.width ?? 240) / 2, y = node.position.y + (node.measured?.height ?? 140) / 2;
-    animate({ x: element.clientWidth / 2 - x, y: element.clientHeight / 2 - y, zoom: canvasLayout.focusZoom }, canvasLayout.cameraDuration, id === "matching");
+    const zoom = Math.min(canvasLayout.focusZoom, (element.clientWidth - 32) / (node.measured?.width ?? 336), (element.clientHeight - 32) / (node.measured?.height ?? 280));
+    animate({ x: element.clientWidth / 2 - x * zoom, y: element.clientHeight / 2 - y * zoom, zoom }, canvasLayout.cameraDuration, id === "matching");
   }, [animate, cancel, getNode]);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -188,7 +189,7 @@ function Canvas({ run, replay, paused, onInspect }: { run: RunDetail; replay: Re
     const label = i === 1 ? "Passed extracted fields" : i === 2 ? state === "failed" ? "Duplicate flagged" : run.duplicate ? "Handed off without a flag" : "Passed verified PO match" : i === 3 && state !== "failed" ? "Approved for payment" : undefined;
     return { id: `string-${i}`, source, target: ids[i + 1] ?? "output", sourceHandle: "outgoing", targetHandle: "incoming", type: "string", data: { active: replay?.phase === "handoff" && replay.index === i - 1, state, label, warning: i === 2 && run.duplicate, elbow: i === 2, onLine: i === 1 || i === 2, bounds } };
   });
-  return <div className="flex min-h-0 flex-1 flex-col"><div className="canvas-scroll-area min-h-0 flex-1 overflow-auto"><div ref={container} className={`investigation-canvas relative h-full overflow-hidden ${fitted ? "canvas-fitted" : ""} ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
+  return <div className="canvas-workspace flex min-h-0 flex-1 flex-col"><div className="canvas-scroll-area min-h-0 flex-1 overflow-auto"><div ref={container} className={`investigation-canvas relative h-full overflow-hidden ${fitted ? "canvas-fitted" : ""} ${focus ? "canvas-is-focused" : ""}`} aria-label="Invoice investigation canvas" onWheelCapture={interrupt} onPointerDownCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.canvas-controls, .nodrag')) interrupt(); }}>
     <ReactFlow nodes={visibleNodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes} minZoom={replayFit.minZoom} maxZoom={1.8} nodesConnectable={false} edgesReconnectable={false} elementsSelectable={false} nodeDragThreshold={4} onNodeDragStart={interrupt} onNodeDragStop={(_, dragged) => setNodes(current => {
       const size = (n: FlowNode) => ({ width: n.measured?.width ?? 240, height: n.measured?.height ?? 140 });
       const others = current.filter(n => n.id !== dragged.id).map(n => ({ ...n.position, ...size(n) }));

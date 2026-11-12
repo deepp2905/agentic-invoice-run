@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Prototype architecture
+- Use a shared mobile navigation drawer, stacked table rows and an independently scrollable investigation workspace on narrow screens so all actions remain reachable without shrinking canvas text.
 - Resolve each run through the browser-safe mock-runs catalog; keep historical agent evidence and receipts separate from duplicate-only replay and shared remediation state so unrelated runs never inherit a hold.
 - Keep cross-page prototype actions in a root-mounted React context with a pure reducer so navigation preserves state and undo/replay remain testable without persistence.
 - Initialize demo and hint state per root mount without browser storage; group identical consecutive replay results in the reducer to keep fresh loads predictable and Activity concise.

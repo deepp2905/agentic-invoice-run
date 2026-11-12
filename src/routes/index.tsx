@@ -61,22 +61,22 @@ function RunsPage() {
       <div className="mb-10">{!held && !state.investigated && <p className="text-sm text-muted-foreground">Start here: click Investigate to see what the agent did.</p>}</div>
 
       <PageTitle>Runs</PageTitle>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex gap-2" role="tablist" aria-label="Filter runs">
+      <div className="mb-6 grid min-w-0 gap-3 lg:flex lg:items-center">
+        <div className="flex min-w-0 gap-1 overflow-x-auto sm:gap-2" role="tablist" aria-label="Filter runs">
           {tabs.map((item) => (
-            <button key={item.id} role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)}
-              className={`rounded-sm px-3 py-1.5 text-sm transition-colors ${tab === item.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+            <Button variant="ghost" key={item.id} role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)}
+              className={`h-auto shrink-0 rounded-sm px-3 py-2 text-sm transition-colors ${tab === item.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
               {item.label} <span className="ml-1 text-xs text-muted-foreground">{counts[item.id]}</span>
-            </button>
+            </Button>
           ))}
         </div>
-        <div className="relative ml-auto">
+        <div className="relative min-w-0 lg:ml-auto">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search invoice or vendor" aria-label="Search runs" className="w-64 pl-9" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search invoice or vendor" aria-label="Search runs" className="w-full pl-9 lg:w-64" />
         </div>
       </div>
       <Surface className="overflow-x-auto bg-transparent">
-        <table className="w-full text-sm">
+        <table className="runs-table w-full text-sm">
           <thead className="bg-card text-left text-muted-foreground">
             <tr>
               {["Run", "Vendor", "Amount", "Status", "Time"].map((h) => (
@@ -92,10 +92,10 @@ function RunsPage() {
               return (
                 <tr key={r.id} className="border-t border-border">
                   <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate || r.id === "INV-4821-B" || r.id === "INV-4821-C") && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}{r.id === "INV-4821-D" && <Chip tone="success" className="mt-2 flex bg-transparent px-0">Not a duplicate</Chip>}</td>
-                  <td className="px-6 py-4">{r.vendor}</td>
-                  <td className="px-6 py-4">{r.amount}</td>
+                  <td data-label="Vendor" className="px-6 py-4">{r.vendor}</td>
+                  <td data-label="Amount" className="px-6 py-4">{r.amount}</td>
                   <td className="px-6 py-4"><Chip tone={meta.tone}>{meta.label}</Chip></td>
-                  <td className="px-6 py-4 text-muted-foreground">{r.date}</td>
+                  <td data-label="Time" className="px-6 py-4 text-muted-foreground">{r.date}</td>
                   <td className="px-6 py-4 text-right">
                     <Button asChild size="sm" className="w-32 justify-between" variant={investigate ? "warning" : "secondary"}>
                       <Link to="/runs/$runId" params={{ runId: r.id }} onClick={() => { if (investigate) dispatch({ type: "investigate" }); }}>

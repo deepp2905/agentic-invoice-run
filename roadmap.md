@@ -1,4 +1,5 @@
 # Prototype additions
+- [x] Responsive Runs, Rules, Activity, sidebar and investigation controls; verified mobile, tablet and desktop flows
 - [x] Verified keyboard-only button focus, 40px extra bottom clearance, and Activity filter/list consistency
 - [x] Judge readiness: fresh-load defaults, session hints, readable fit/scroll, grouped replays, About panel and navigation checks
 - [x] Requested public publishing of the verified changes

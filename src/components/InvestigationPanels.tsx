@@ -14,7 +14,7 @@ export function InvestigationPanels({ run, panel, onClose }: { run: RunDetail; p
   const { state, dispatch } = usePrototype();
   const agent = typeof panel === "object" ? panel : null;
   return <Sheet open={panel !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
-    <SheetContent className="w-full overflow-y-auto bg-card p-8 sm:max-w-md">
+    <SheetContent className="w-full overflow-y-auto bg-card p-5 sm:max-w-md sm:p-8">
       <SheetTitle>{agent?.name ?? (panel === "pause" ? "Similar queued invoices" : "Edit duplicate rule")}</SheetTitle>
       <SheetDescription className="mt-2">{agent?.summary ?? (panel === "pause" ? `Harbor Office Supply · ${state.paused ? "2 paused, 1 safe to release" : "2 queued, 1 safe to release"}` : "Duplicate invoice check")}</SheetDescription>
       {agent && <>

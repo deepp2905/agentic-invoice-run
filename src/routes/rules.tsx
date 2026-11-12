@@ -34,13 +34,13 @@ function RulesPage() {
       <PageTitle>Rules</PageTitle>
       <div className="flex flex-col gap-4">
         {rules.map((rule) => (
-          <Surface key={rule.id} className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-5">
-            <div className="min-w-0 flex-1">
+          <Surface key={rule.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-4 px-4 py-5 lg:flex lg:gap-x-6 lg:px-6">
+            <div className="col-span-2 min-w-0 flex-1 lg:col-span-1">
               <p className="flex flex-wrap items-center gap-2 font-medium">{rule.name}{rule.id === "duplicate" && !state.ruleEnabled.duplicate && <Chip tone="warning">Not protecting payments</Chip>}</p>
               <p className="mt-1 text-sm text-muted-foreground">{rule.id === "duplicate" && state.rule === "combined" ? "Blocks payment when vendor, amount and PO match a previously paid invoice." : rule.detail}</p>
               <p className="mt-2 text-xs text-muted-foreground">Last changed {rule.id === "duplicate" && state.rule === "combined" ? "today" : rule.lastChanged} · Used in {rule.usedIn} runs</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="col-span-2 flex shrink-0 items-center justify-between gap-4 lg:col-span-1">
               <Switch checked={state.ruleEnabled[rule.id]} aria-label={`Turn ${rule.name} on or off`}
                 onCheckedChange={() => { dispatch({ type: "toggle", rule: rule.id, time: actionTime(), at: Date.now() }); toast.success(`${rule.name} turned ${state.ruleEnabled[rule.id] ? "off" : "on"}`, { id: "rule-toggle", duration: 2500 }); }} />
               <Button variant="secondary" size="sm" onClick={() => setOpen(rule.id)}>{rule.id === "duplicate" ? "Edit rule" : "View"}</Button>
@@ -49,7 +49,7 @@ function RulesPage() {
         ))}
       </div>
       <Sheet open={open !== null} onOpenChange={(isOpen) => { if (!isOpen) setOpen(null); }}>
-        <SheetContent className="w-full overflow-y-auto bg-card p-8 sm:max-w-md">
+        <SheetContent className="w-full overflow-y-auto bg-card p-5 sm:max-w-md sm:p-8">
           <SheetTitle>{open === "duplicate" ? "Edit duplicate rule" : openRule?.name}</SheetTitle>
           <SheetDescription className="mt-2">{openRule?.detail}</SheetDescription>
           {open === "duplicate" ? <RuleEditor onSaved={() => setOpen(null)} /> : openRule && <div className="mt-8 text-sm">
