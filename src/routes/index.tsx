@@ -91,7 +91,7 @@ function RunsPage() {
               const investigate = r.id === "INV-4821-A" && !held;
               return (
                 <tr key={r.id} className="border-t border-border">
-                  <td className="px-6 py-4"><span className="font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate || r.id === "INV-4821-B" || r.id === "INV-4821-C") && <Chip tone="warning" className="mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}{r.id === "INV-4821-D" && <Chip tone="success" className="mt-2 flex bg-transparent px-0">Not a duplicate</Chip>}</td>
+                  <td className="run-identity px-6 py-4"><span className="run-id font-mono">{r.id}</span>{(r.id === "INV-4821" || investigate || r.id === "INV-4821-B" || r.id === "INV-4821-C") && <Chip tone="warning" className="run-classification mt-2 flex bg-transparent px-0">Possible duplicate</Chip>}{r.id === "INV-4821-D" && <Chip tone="success" className="run-classification mt-2 flex bg-transparent px-0">Not a duplicate</Chip>}</td>
                   <td data-label="Vendor" className="px-6 py-4">{r.vendor}</td>
                   <td data-label="Amount" className="px-6 py-4">{r.amount}</td>
                   <td className="px-6 py-4"><Chip tone={meta.tone}>{meta.label}</Chip></td>

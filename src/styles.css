@@ -92,16 +92,24 @@
   .canvas-workspace { flex: none; height: var(--mobile-canvas-height); }
   .runs-table, .runs-table tbody { display: block; }
   .runs-table thead { display: none; }
-  .runs-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 16px; }
+  .runs-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "invoice amount" "vendor vendor" "flag status" "time action";
+    gap: 12px;
+    padding: 16px;
+  }
   .runs-table tr:first-child { border-top: 0; }
   .runs-table td { min-width: 0; padding: 0; overflow-wrap: anywhere; }
-  .runs-table td:nth-child(1) { grid-column: 1; grid-row: 1; }
-  .runs-table td:nth-child(4) { grid-column: 2; grid-row: 1; text-align: right; }
-  .runs-table td:nth-child(2) { grid-column: 1 / -1; }
-  .runs-table td:nth-child(5) { grid-column: 1; }
-  .runs-table td:nth-child(6) { grid-column: 2; align-self: end; }
-  .runs-table td[data-label]::before { content: attr(data-label); display: block; color: var(--muted-foreground); font-size: var(--text-xs); margin-bottom: 4px; }
-  .runs-table td[colspan] { grid-column: 1 / -1; padding: 16px 0; }
+  .runs-table .run-identity { display: contents; }
+  .runs-table .run-id { grid-area: invoice; min-width: 0; align-self: center; font-weight: 600; }
+  .runs-table .run-classification { grid-area: flag; align-self: center; margin: 0; padding: 0; }
+  .runs-table td:nth-child(2) { grid-area: vendor; color: var(--muted-foreground); }
+  .runs-table td:nth-child(3) { grid-area: amount; text-align: right; font-family: var(--font-mono); font-size: var(--text-base); font-weight: 600; }
+  .runs-table td:nth-child(4) { grid-area: status; text-align: right; align-self: center; }
+  .runs-table td:nth-child(5) { grid-area: time; align-self: center; font-size: var(--text-xs); }
+  .runs-table td:nth-child(6) { grid-area: action; align-self: center; }
+  .runs-table td[colspan] { grid-area: 1 / 1 / -1 / -1; padding: 16px 0; }
 }
 @media (max-width: 1099px) {
   .canvas-fitted { min-width: var(--canvas-scroll-width); }
